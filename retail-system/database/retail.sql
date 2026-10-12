@@ -1,0 +1,22 @@
+CREATE DATABASE IF NOT EXISTS retail_db;
+USE retail_db;
+
+CREATE TABLE IF NOT EXISTS productos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  codigo VARCHAR(50) UNIQUE,
+  costo DECIMAL(10,2) NOT NULL,
+  precio_venta DECIMAL(10,2) NOT NULL,
+  stock INT DEFAULT 0,
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ventas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  producto_id INT,
+  cantidad INT,
+  total DECIMAL(10,2),
+  ganancia DECIMAL(10,2),
+  fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (producto_id) REFERENCES productos(id)
+);
