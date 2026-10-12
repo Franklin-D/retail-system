@@ -1,0 +1,9 @@
+# Proyecto: Sistema Retail - Gestión y Ganancias
+Stack: XAMPP (Apache+PHP), MySQL, HTML/CSS/JS vanilla. No frameworks por ahora.
+
+Estructura BD: tabla productos(id, nombre, costo, precio_venta, stock), tabla ventas...
+Estándares: Usar mysqli procedural, todo en español, comentarios cortos.
+Regla: No crear frameworks nuevos. Mejorar lo que hay.
+Objetivo actual: Crear frontend para CRUD de productos y reporte de ganancias.
+
+Cuando te pidan algo, primero lee /database/retail.sql y /backend/config.php
