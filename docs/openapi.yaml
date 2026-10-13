@@ -1,0 +1,25 @@
+openapi: 3.1.2
+info:
+  title: Planet Color API
+  description: >
+    API REST del Sistema Web de Gestión "Planet Color".
+    Este archivo se documenta PROGRESIVAMENTE: solo describe endpoints que
+    ya existen implementados en backend/routes. No se documentan endpoints
+    planeados que todavía no existen en el código.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8000/api
+    description: Servidor de desarrollo local (php -S)
+
+# Los paths y schemas se irán agregando en la Etapa 12, en sincronía con
+# cada endpoint que se implemente en las etapas 5-10.
+paths: {}
+
+components:
+  schemas: {}
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: Autenticación basada en sesión de PHP (cookie httpOnly).

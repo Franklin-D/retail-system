@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Productos e Inventario</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-page="products">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 style="font-size: 32px;">Productos e Inventario</h1>
+        <button class="btn-primary" id="addProductBtn">
+          <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Agregar Producto
+        </button>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <input type="text" id="searchProduct" placeholder="Buscar por nombre o código de barras...">
+      </div>
+
+      <div class="card">
+        <table id="productsTable">
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Código</th>
+              <th>Categoría</th>
+              <th>Stock</th>
+              <th>Precio</th>
+              <th>Vencimiento</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody">
+            <tr style="text-align:center; color:#94a3b8;">
+              <td colspan="8">Pendiente de conectar con /api/products (Etapa 7)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Agregar/Editar Producto -->
+  <div id="addProductModal" class="modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="modal-title">Agregar Nuevo Producto</div>
+        <button data-close-modal="addProductModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">✕</button>
+      </div>
+      <form id="addProductForm">
+        <div class="form-grid">
+          <div class="form-group"><label>Nombre del Producto</label><input type="text" name="nombre" required></div>
+          <div class="form-group"><label>Código de Barras</label><input type="text" name="codigo_barra" required></div>
+          <div class="form-group"><label>Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
+          <div class="form-group"><label>Categoría</label><input type="text" name="categoria" required></div>
+          <div class="form-group"><label>Marca</label><input type="text" name="marca"></div>
+          <div class="form-group"><label>Proveedor</label><input type="text" name="proveedor" required></div>
+          <div class="form-group"><label>Ubicación de Pasillo</label><input type="text" name="pasillo"></div>
+          <div class="form-group"><label>Stock</label><input type="number" name="stock" required min="0"></div>
+          <div class="form-group"><label>Precio (S/)</label><input type="number" name="precio" required step="0.01" min="0"></div>
+          <div class="form-group"><label>Fecha de vencimiento</label><input type="date" name="fecha_vencimiento"></div>
+          <div class="form-group"><label>Imagen del producto</label><input type="file" name="imagen" accept="image/*"></div>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top:15px;">
+          Guardar Producto
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../components/load-component.js" type="module"></script>
+  <script type="module" src="../components/modal.js"></script>
+  <script type="module" src="../js/modules/products.js"></script>
+</body>
+</html>

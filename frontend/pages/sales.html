@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Ventas</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-page="sales">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+      <h1 style="font-size: 32px; margin-bottom: 20px;">Ventas</h1>
+
+      <div class="card">
+        <h3 style="font-size: 18px; margin-bottom: 15px;">Buscar Producto</h3>
+        <div style="display:flex; gap:10px; align-items:center; max-width:550px;">
+          <input type="text" id="searchProduct" placeholder="Busca por nombre o código de barra...">
+          <button class="btn-primary" id="scanBarcodeBtn" type="button" style="white-space: nowrap;">
+            Escanear Código de Barras
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 18px; margin-bottom: 15px;">Productos Disponibles</h3>
+        <div id="productsList" style="max-height: 400px; overflow-y: auto;">
+          <div class="skeleton">Pendiente de conectar con /api/products (Etapa 8)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 18px; margin-bottom: 15px;">Carrito de Venta</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Subtotal</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="cartTable">
+            <tr style="text-align: center; color: #94a3b8;"><td colspan="5">El carrito está vacío</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; align-items:center;">
+          <div style="font-size: 18px; font-weight: bold;">Total: S/ <span id="cartTotal">0.00</span></div>
+          <button class="btn-primary" id="checkoutBtn">Proceder al Pago</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de pago -->
+  <div id="paymentModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="modal-title">Procesar Pago</div>
+        <button data-close-modal="paymentModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Método de pago</label>
+        <select id="paymentMethod">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta">Tarjeta</option>
+          <option value="Yape">Yape</option>
+          <option value="Plin">Plin</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="confirmPaymentBtn" style="width:100%; justify-content:center; margin-top:20px;">
+        Confirmar Pago
+      </button>
+    </div>
+  </div>
+
+  <script src="../components/load-component.js" type="module"></script>
+  <script type="module" src="../components/modal.js"></script>
+  <script type="module" src="../js/modules/sales.js"></script>
+</body>
+</html>

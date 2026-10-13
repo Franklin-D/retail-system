@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Finanzas</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-page="finance">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+      <h1 style="font-size: 32px; margin-bottom: 20px;">Finanzas</h1>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Monto</th></tr>
+          </thead>
+          <tbody id="financeTableBody">
+            <tr style="text-align:center; color:#94a3b8;">
+              <td colspan="4">Pendiente de conectar con /api/income (Etapa 9)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../components/load-component.js" type="module"></script>
+  <script type="module" src="../js/modules/finance.js"></script>
+</body>
+</html>
