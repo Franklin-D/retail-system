@@ -15,6 +15,7 @@ class Producto
     public ?string $fecha_vencimiento;
     public ?string $imagen;
     public int $activo;
+    public string $estado;
 
     public function __construct(array $data = [])
     {
@@ -33,6 +34,8 @@ class Producto
         $this->fecha_vencimiento = ($fecha === '' || $fecha === null) ? null : $fecha;
         $this->imagen = $data['imagen'] ?? null;
         $this->activo = isset($data['activo']) ? (int) $data['activo'] : 1;
+        $estado = $data['estado'] ?? 'publicado';
+        $this->estado = in_array($estado, ['borrador', 'publicado'], true) ? $estado : 'publicado';
     }
 
     public function toArray(): array
@@ -52,6 +55,7 @@ class Producto
             'fecha_vencimiento' => $this->fecha_vencimiento,
             'imagen'            => $this->imagen,
             'activo'            => $this->activo,
+            'estado'            => $this->estado,
         ];
     }
 }

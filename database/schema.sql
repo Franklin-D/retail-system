@@ -124,6 +124,7 @@ CREATE TABLE productos (
   fecha_vencimiento  DATE           NULL,
   imagen             VARCHAR(255)   NULL COMMENT 'Ruta relativa dentro de backend/public/uploads',
   activo             TINYINT(1)     NOT NULL DEFAULT 1 COMMENT 'Baja lógica en vez de DELETE físico',
+  estado             ENUM('borrador','publicado') NOT NULL DEFAULT 'publicado' COMMENT 'borrador = pre-carga de empleados (oculto); publicado = visible en tienda',
   created_at         TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at         TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_productos_categoria
@@ -135,6 +136,7 @@ CREATE TABLE productos (
 ) ENGINE = InnoDB;
 
 CREATE INDEX idx_productos_categoria ON productos(categoria_id);
+CREATE INDEX idx_productos_estado ON productos(estado, activo);
 CREATE INDEX idx_productos_proveedor ON productos(proveedor_id);
 CREATE INDEX idx_productos_nombre ON productos(nombre);
 CREATE INDEX idx_productos_vencimiento ON productos(fecha_vencimiento);

@@ -31,3 +31,9 @@ document.addEventListener('click', (event) => {
     event.target.classList.remove('active');
   }
 });
+
+// Botones ✕ / Cancelar: cualquier elemento con data-close-modal="idDelModal" cierra ese modal
+document.addEventListener('click', (event) => {
+  const boton = event.target.closest && event.target.closest('[data-close-modal]');
+  if (boton) closeModal(boton.dataset.closeModal);
+});

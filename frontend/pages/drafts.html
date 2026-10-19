@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Pre-carga de Productos</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-page="drafts">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 style="font-size: 32px;">Pre-carga de Productos</h1>
+        <button class="btn-primary" id="addDraftBtn">
+          <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Nuevo borrador
+        </button>
+      </div>
+
+      <div class="alert alert-notice">
+        Los borradores <strong>no aparecen</strong> en Productos ni en Ventas hasta que se den de alta.
+        Aquí solo se adelanta el trabajo: datos básicos y foto.
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <input type="text" id="searchDraft" placeholder="Buscar borrador por nombre o código de barras...">
+      </div>
+
+      <div class="card">
+        <table id="draftsTable">
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Código</th>
+              <th>Categoría</th>
+              <th>Proveedor</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="draftsTableBody">
+            <tr style="text-align:center; color:#94a3b8;"><td colspan="7">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nuevo borrador / editar borrador / dar de alta (el mismo formulario para los 3) -->
+  <div id="draftModal" class="modal">
+    <div class="modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="modal-title" id="draftModalTitle">Nuevo borrador</div>
+        <button type="button" data-close-modal="draftModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">✕</button>
+      </div>
+      <p id="draftHint" style="color:#64748b; font-size:13px; margin-bottom:15px;"></p>
+      <form id="draftForm">
+        <div class="form-grid">
+          <div class="form-group"><label>Nombre del Producto *</label><input type="text" name="nombre" required maxlength="150"></div>
+          <div class="form-group"><label>Código de Barras *</label><input type="text" name="codigo_barra" required maxlength="50"></div>
+          <div class="form-group"><label>Categoría *</label><select name="categoria_id" required></select></div>
+          <div class="form-group"><label>Proveedor *</label><select name="proveedor_id" required></select></div>
+          <div class="form-group"><label>Marca</label><input type="text" name="marca" maxlength="100"></div>
+          <div class="form-group"><label>Ubicación de Pasillo</label><input type="text" name="pasillo" maxlength="50"></div>
+          <div class="form-group"><label id="lblPrecio">Precio (S/)</label><input type="number" name="precio" step="0.01" min="0" placeholder="Opcional"></div>
+          <div class="form-group"><label id="lblStock">Stock</label><input type="number" name="stock" min="0" placeholder="Opcional"></div>
+          <div class="form-group"><label>Fecha de vencimiento</label><input type="date" name="fecha_vencimiento"></div>
+          <div class="form-group">
+            <label>Foto del producto</label>
+            <input type="file" name="imagen" id="draftImagen" accept="image/png,image/jpeg,image/gif,image/webp">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;"><label>Descripción</label><textarea name="descripcion" rows="3"></textarea></div>
+        </div>
+        <div id="draftPreviewWrap" style="display:none; margin-top:10px;">
+          <img id="draftPreview" alt="Vista previa" style="max-height:120px; max-width:100%; border-radius:8px; border:1px solid #cbd5e1;">
+        </div>
+        <button type="submit" id="draftSubmit" class="btn-primary" style="width: 100%; justify-content: center; margin-top:15px;">
+          Guardar borrador
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../components/load-component.js" type="module"></script>
+  <script type="module" src="../components/modal.js"></script>
+  <script type="module" src="../js/modules/drafts.js"></script>
+</body>
+</html>
