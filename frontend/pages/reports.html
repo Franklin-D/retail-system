@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Reportes</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-page="reports">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+      <h1 style="font-size: 32px; margin-bottom: 20px;">Reportes</h1>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Reporte</th><th>Descripción</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="reportsTableBody">
+            <tr style="text-align:center; color:#94a3b8;">
+              <td colspan="3">Cargando reportes...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card" id="reportResult" style="margin-top:20px;">
+        <p style="color:#94a3b8; font-size:13px;">Selecciona un reporte para ver los datos.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../components/load-component.js" type="module"></script>
+  <script type="module" src="../js/modules/reports.js"></script>
+</body>
+</html>

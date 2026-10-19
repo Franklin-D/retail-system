@@ -1,0 +1,183 @@
+openapi: 3.1.2
+info:
+  title: Planet Color API
+  description: >
+    API REST del Sistema Web de Gestión "Planet Color".
+    Autenticación por sesión PHP (cookie httpOnly PHPSESSID).
+  version: 0.2.0
+servers:
+  - url: http://localhost/retail-system/backend/public/index.php/api
+    description: Apache/XAMPP
+  - url: http://localhost:8000/api
+    description: Servidor de desarrollo local (php -S)
+
+paths:
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200': { description: Sesión creada }
+        '401': { description: Credenciales incorrectas }
+  /auth/logout:
+    post:
+      summary: Cerrar sesión
+      responses:
+        '200': { description: Sesión cerrada }
+  /auth/me:
+    get:
+      summary: Usuario de la sesión actual
+      responses:
+        '200': { description: Perfil }
+        '401': { description: No autenticado }
+  /products:
+    get:
+      summary: Listar productos
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200': { description: Listado }
+    post:
+      summary: Crear producto
+      responses:
+        '201': { description: Creado }
+  /products/{id}:
+    get:
+      summary: Obtener producto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Producto }
+    put:
+      summary: Actualizar producto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Actualizado }
+    delete:
+      summary: Baja lógica de producto
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Eliminado }
+  /categories:
+    get:
+      summary: Listar categorías
+      responses:
+        '200': { description: Listado }
+  /suppliers:
+    get:
+      summary: Listar proveedores
+      responses:
+        '200': { description: Listado }
+  /customers:
+    get:
+      summary: Listar clientes
+      responses:
+        '200': { description: Listado }
+  /sales:
+    get:
+      summary: Listar ventas
+      responses:
+        '200': { description: Listado }
+    post:
+      summary: Registrar venta (alias de checkout)
+      responses:
+        '201': { description: Creada }
+  /sales/checkout:
+    post:
+      summary: Registrar venta, descontar stock, ingreso y boleta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items, metodo_pago]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      producto_id: { type: integer }
+                      cantidad: { type: integer }
+                metodo_pago:
+                  type: string
+                  enum: [Efectivo, Tarjeta, Yape, Plin]
+                cliente_id: { type: integer }
+      responses:
+        '201': { description: Venta y factura }
+  /purchases:
+    get:
+      summary: Listar compras
+      responses:
+        '200': { description: Listado }
+  /invoices:
+    get:
+      summary: Listar facturas
+      responses:
+        '200': { description: Listado }
+  /income:
+    get:
+      summary: Listar ingresos
+      responses:
+        '200': { description: Listado }
+  /expenses:
+    get:
+      summary: Listar egresos
+      responses:
+        '200': { description: Listado }
+  /reports:
+    get:
+      summary: Catálogo de reportes
+      responses:
+        '200': { description: Listado }
+  /reports/summary:
+    get:
+      summary: Resumen de inventario y ganancia
+      responses:
+        '200': { description: Totales }
+  /reports/inventory:
+    get:
+      summary: Reporte de inventario
+      responses:
+        '200': { description: Productos con alertas }
+  /reports/profits:
+    get:
+      summary: Reporte de ganancias
+      responses:
+        '200': { description: Totales y ventas }
+
+components:
+  schemas: {}
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: PHPSESSID
+      description: Autenticación basada en sesión de PHP (cookie httpOnly).
+
+security:
+  - sessionAuth: []

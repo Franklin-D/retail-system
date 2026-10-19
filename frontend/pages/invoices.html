@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Facturación Electrónica</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body data-page="invoices">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+      <h1 style="font-size: 32px; margin-bottom: 20px;">Facturación Electrónica</h1>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Tipo</th><th>Número</th><th>Fecha</th><th>Monto</th><th>Estado</th></tr>
+          </thead>
+          <tbody id="invoicesTableBody">
+            <tr style="text-align:center; color:#94a3b8;">
+              <td colspan="5">Pendiente de conectar con /api/invoices (Etapa 9)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../components/load-component.js" type="module"></script>
+  <script type="module" src="../js/modules/invoices.js"></script>
+</body>
+</html>

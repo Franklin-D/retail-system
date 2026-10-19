@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Inicio</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .inicio { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; gap: 24px; }
+    .inicio h1 { font-size: 36px; font-weight: 800; letter-spacing: 1px; text-align: center; }
+    .inicio p { color: #94a3b8; text-align: center; }
+    .inicio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; max-width: 900px; }
+    .inicio-grid a { text-decoration: none; color: inherit; }
+    .inicio-grid .card { text-align: center; padding: 20px; transition: transform .15s; }
+    .inicio-grid .card:hover { transform: translateY(-3px); }
+    .inicio-estado { font-size: 13px; color: #94a3b8; }
+  </style>
+</head>
+<body data-page="index">
+  <main class="inicio">
+    <h1>PLANET COLOR</h1>
+    <p>Sistema de gestión retail: inventario, ventas, compras y finanzas.</p>
+    <p class="inicio-estado" id="estado">Verificando sesión…</p>
+
+    <div class="inicio-grid" id="menu" hidden>
+      <a href="pages/dashboard.html"><div class="card">🏠<br>Panel Principal</div></a>
+      <a href="pages/products.html"><div class="card">📦<br>Productos e Inventario</div></a>
+      <a href="pages/sales.html"><div class="card">🛒<br>Ventas</div></a>
+      <a href="pages/purchases.html"><div class="card">🚚<br>Compras</div></a>
+      <a href="pages/customers.html"><div class="card">👥<br>Clientes</div></a>
+      <a href="pages/suppliers.html"><div class="card">🏭<br>Proveedores</div></a>
+      <a href="pages/invoices.html"><div class="card">🧾<br>Facturación</div></a>
+      <a href="pages/finance.html"><div class="card">📊<br>Finanzas</div></a>
+      <a href="pages/reports.html"><div class="card">📋<br>Reportes</div></a>
+    </div>
+
+    <a class="btn-primary" id="btnLogin" href="pages/login.html" hidden
+       style="text-decoration:none; padding:12px 28px; justify-content:center;">Iniciar sesión</a>
+  </main>
+
+  <script type="module">
+    import { getCurrentUser } from './js/services/auth.js';
+
+    const estado = document.getElementById('estado');
+    const menu = document.getElementById('menu');
+    const btnLogin = document.getElementById('btnLogin');
+
+    const usuario = await getCurrentUser();
+    if (usuario) {
+      // Sesión activa: se muestra el acceso a todos los módulos
+      estado.textContent = `Sesión iniciada: ${usuario.nombre ?? usuario.email ?? 'usuario'}`;
+      menu.hidden = false;
+    } else {
+      // Sin sesión (o backend apagado): se envía al login
+      estado.textContent = 'Debes iniciar sesión para continuar.';
+      btnLogin.hidden = false;
+      setTimeout(() => { window.location.href = 'pages/login.html'; }, 1200);
+    }
+  </script>
+</body>
+</html>

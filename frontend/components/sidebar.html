@@ -1,0 +1,55 @@
+<!--
+  components/sidebar.html
+  -----------------------------------------------------------------------
+  Fragmento HTML reutilizable en todas las páginas del dashboard.
+  Se inyecta en tiempo de carga mediante components/load-component.js,
+  que es el "patrón de componentes" elegido para JS vanilla (sin
+  frameworks): cada fragmento vive en su propio archivo y se carga por
+  fetch() + injection en un contenedor <div data-component="sidebar">.
+
+  El atributo data-page en cada <body> de las páginas se usa para marcar
+  como "activo" el ítem correspondiente (ver load-component.js).
+  -----------------------------------------------------------------------
+-->
+<div class="sidebar">
+  <div style="padding: 15px 0; border-bottom: 1px solid rgba(99, 102, 241, 0.2); margin-bottom: 20px;">
+    <div style="font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 10px;">
+      <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #6366f1, #ec4899); border-radius: 50%;"></div>
+      Planet Color
+    </div>
+  </div>
+
+  <a class="sidebar-item" data-nav="dashboard" href="dashboard.html">
+    <i data-lucide="home" style="width: 20px; height: 20px;"></i> <span>Panel Principal</span>
+  </a>
+  <a class="sidebar-item" data-nav="products" href="products.html">
+    <i data-lucide="package" style="width: 20px; height: 20px;"></i> <span>Productos e Inventario</span>
+  </a>
+  <a class="sidebar-item" data-nav="sales" href="sales.html">
+    <i data-lucide="shopping-cart" style="width: 20px; height: 20px;"></i> <span>Ventas</span>
+  </a>
+  <a class="sidebar-item" data-nav="purchases" href="purchases.html">
+    <i data-lucide="truck" style="width: 20px; height: 20px;"></i> <span>Compras</span>
+  </a>
+  <a class="sidebar-item" data-nav="customers" href="customers.html">
+    <i data-lucide="users" style="width: 20px; height: 20px;"></i> <span>Clientes</span>
+  </a>
+  <a class="sidebar-item" data-nav="suppliers" href="suppliers.html">
+    <i data-lucide="factory" style="width: 20px; height: 20px;"></i> <span>Proveedores</span>
+  </a>
+  <a class="sidebar-item" data-nav="invoices" href="invoices.html">
+    <i data-lucide="file-text" style="width: 20px; height: 20px;"></i> <span>Facturación</span>
+  </a>
+  <a class="sidebar-item" data-nav="finance" href="finance.html">
+    <i data-lucide="bar-chart-3" style="width: 20px; height: 20px;"></i> <span>Finanzas</span>
+  </a>
+  <a class="sidebar-item" data-nav="reports" href="reports.html">
+    <i data-lucide="clipboard-list" style="width: 20px; height: 20px;"></i> <span>Reportes</span>
+  </a>
+
+  <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(99, 102, 241, 0.2);">
+    <a class="sidebar-item" id="logoutLink" href="login.html">
+      <i data-lucide="log-out" style="width: 20px; height: 20px;"></i> <span>Cerrar Sesión</span>
+    </a>
+  </div>
+</div>
