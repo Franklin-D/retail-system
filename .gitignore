@@ -1,0 +1,26 @@
+# Entorno local
+.env
+.env.local
+
+# Dependencias
+/vendor/
+/backend/vendor/
+/node_modules/
+
+# Composer
+/composer.phar
+
+# Logs y temporales
+*.log
+*.tmp
+*.cache
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+
+# Builds del frontend
+/frontend/dist/

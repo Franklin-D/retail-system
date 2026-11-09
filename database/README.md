@@ -1,9 +1,11 @@
 # database/
 
-- `schema.sql` — Estructura completa de la base de datos (tablas, llaves
-  foráneas, índices). Se implementa en la **Etapa 3**.
+- `schema.sql` — Estructura completa de la base de datos `planet_color`
+  (tablas, llaves foráneas, índices).
 - `seed.sql` — Datos iniciales de prueba (ficticios, sin contraseñas ni datos
-  reales). Se implementa en la **Etapa 3**.
+  reales).
+- `migrations/` — Cambios incrementales aplicados después del esquema base
+  (por ejemplo, nuevas columnas o estados).
 
 ## Cómo aplicar los scripts
 
@@ -12,7 +14,13 @@ mysql -u root -p < schema.sql
 mysql -u root -p < seed.sql
 ```
 
-## Convenciones usadas (a partir de la Etapa 3)
+Las migraciones se aplican en orden numérico:
+
+```bash
+mysql -u root -p planet_color < migrations/001_productos_estado.sql
+```
+
+## Convenciones usadas
 
 - Nombres de tabla en `snake_case`, plural (`productos`, `detalle_venta`).
 - Toda tabla tiene `id` autoincremental como llave primaria.

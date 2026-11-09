@@ -1,13 +1,16 @@
 <?php
 /**
- * Front controller: sesión, CORS, despacho a routes/*.routes.php
+ * Front controller: sesión, CORS y despacho a src/Routes/*.php
  */
-require_once __DIR__ . '/../config/env.php';
-loadEnv(__DIR__ . '/../../.env');
 
-require_once __DIR__ . '/../utils/Response.php';
-require_once __DIR__ . '/../middleware/cors.middleware.php';
-require_once __DIR__ . '/../middleware/auth.middleware.php';
+use Retail\Config\Env;
+use Retail\Middleware\AuthMiddleware;
+use Retail\Middleware\CorsMiddleware;
+use Retail\Utils\Response;
+
+require_once __DIR__ . '/../autoload.php';
+
+Env::load(__DIR__ . '/../../.env');
 
 session_set_cookie_params([
     'lifetime' => 0,
@@ -17,7 +20,7 @@ session_set_cookie_params([
 ]);
 session_start();
 
-applyCors();
+CorsMiddleware::apply();
 
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 if (preg_match('#/api(/.*)?$#', $path, $coincidencias)) {
@@ -42,7 +45,7 @@ $publicas = (
 );
 
 if (!$publicas) {
-    requireAuth();
+    AuthMiddleware::requireAuth();
 }
 
 try {
@@ -50,43 +53,43 @@ try {
         case '':
         case 'ping':
             Response::success([
-                'database' => env('DB_NAME', 'planet_color'),
+                'database' => Env::get('DB_NAME', 'planet_color'),
                 'time'     => date('Y-m-d H:i:s'),
             ], 'API activa');
             break;
         case 'auth':
-            require __DIR__ . '/../routes/auth.routes.php';
+            require __DIR__ . '/../src/Routes/AuthRoutes.php';
             break;
         case 'products':
         case 'productos':
-            require __DIR__ . '/../routes/products.routes.php';
+            require __DIR__ . '/../src/Routes/ProductRoutes.php';
             break;
         case 'categories':
-            require __DIR__ . '/../routes/categories.routes.php';
+            require __DIR__ . '/../src/Routes/CategoryRoutes.php';
             break;
         case 'suppliers':
-            require __DIR__ . '/../routes/suppliers.routes.php';
+            require __DIR__ . '/../src/Routes/SupplierRoutes.php';
             break;
         case 'customers':
-            require __DIR__ . '/../routes/customers.routes.php';
+            require __DIR__ . '/../src/Routes/CustomerRoutes.php';
             break;
         case 'sales':
-            require __DIR__ . '/../routes/sales.routes.php';
+            require __DIR__ . '/../src/Routes/SalesRoutes.php';
             break;
         case 'purchases':
-            require __DIR__ . '/../routes/purchases.routes.php';
+            require __DIR__ . '/../src/Routes/PurchaseRoutes.php';
             break;
         case 'invoices':
-            require __DIR__ . '/../routes/invoices.routes.php';
+            require __DIR__ . '/../src/Routes/InvoiceRoutes.php';
             break;
         case 'income':
-            require __DIR__ . '/../routes/income.routes.php';
+            require __DIR__ . '/../src/Routes/IncomeRoutes.php';
             break;
         case 'expenses':
-            require __DIR__ . '/../routes/expenses.routes.php';
+            require __DIR__ . '/../src/Routes/ExpenseRoutes.php';
             break;
         case 'reports':
-            require __DIR__ . '/../routes/reports.routes.php';
+            require __DIR__ . '/../src/Routes/ReportRoutes.php';
             break;
         default:
             Response::error('Ruta no encontrada', 404);

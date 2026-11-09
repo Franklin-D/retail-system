@@ -24,13 +24,13 @@ El frontend **nunca** accede a MySQL directamente. Todo pasa por la API REST.
 ## 2. Flujo de comunicación entre capas (genérico)
 
 ```
-Navegador (products.html)
-   → frontend/js/services/api.js → fetch('/api/products', {...})
+Navegador (frontend/features/products/products.html)
+   → frontend/shared/js/api.js → fetch('/api/products', {...})
       → backend/public/index.php (front controller)
-         → backend/routes/products.routes.php
-            → backend/controllers/ProductController.php   (valida entrada, HTTP)
-               → backend/services/ProductService.php        (reglas de negocio)
-                  → backend/repositories/ProductRepository.php (SQL con PDO)
+         → backend/src/Routes/ProductRoutes.php
+            → backend/src/Controllers/ProductController.php   (valida entrada, HTTP)
+               → backend/src/Services/ProductService.php        (reglas de negocio)
+                  → backend/src/Repositories/ProductRepository.php (SQL con PDO)
                      → MySQL
 ```
 
@@ -43,23 +43,28 @@ Cada capa solo conoce a la inmediata inferior:
 
 | Carpeta | Responsabilidad |
 |---|---|
-| `frontend/pages` | Una página HTML por módulo (login, dashboard, products, sales...) |
-| `frontend/components` | Fragmentos HTML/JS reutilizables entre páginas (sidebar, modales, toast) |
-| `frontend/js/services/api.js` | Único lugar que hace `fetch()`; el resto del JS nunca llama `fetch` directo |
-| `frontend/js/modules` | Un módulo JS por página, orquesta UI + llamadas a `api.js` |
-| `frontend/js/utils` | Funciones auxiliares puras (formato de moneda, validaciones de formulario) |
+| `frontend/index.html` | Portada con acceso a todos los módulos |
+| `frontend/features/<modulo>/` | HTML + JS de cada módulo (login, dashboard, products, sales...) |
+| `frontend/shared/components/` | Fragmentos HTML reutilizables entre páginas (sidebar) |
+| `frontend/shared/js/` | Módulos transversales: `api.js`, `auth.js`, `helpers.js`, `load-component.js`, `modal.js`, `toast.js` |
+| `frontend/assets/css/` | Hoja de estilos global |
 | `backend/public/index.php` | Front controller: recibe toda petición, aplica middleware, despacha a rutas |
-| `backend/public/uploads` | Imágenes de productos subidas por el usuario |
-| `backend/routes` | Mapea método HTTP + URL → método de controller. Sin lógica de negocio |
-| `backend/controllers` | Traduce HTTP↔PHP: lee input, llama al service, arma respuesta JSON con código HTTP |
-| `backend/services` | Reglas de negocio puras (ej. "una devolución repone stock y genera egreso") |
-| `backend/repositories` | Único lugar con SQL (PDO + prepared statements), una clase por entidad |
-| `backend/models` | Estructuras de datos planas (Producto, Venta, Factura, Ingreso, Egreso...) |
-| `backend/middleware` | Autenticación por sesión, validación de payload, cabeceras CORS |
-| `backend/config` | Conexión PDO y carga de variables de entorno |
-| `backend/utils` | Helpers transversales (respuesta JSON estándar, validador genérico) |
+| `backend/public/uploads/` | Imágenes de productos subidas por el usuario |
+| `backend/autoload.php` | Autoload PSR-4 (usa `vendor/autoload.php` si Composer está instalado) |
+| `backend/src/Routes/` | Mapea método HTTP + URL → método de controller. Sin lógica de negocio |
+| `backend/src/Controllers/` | Traduce HTTP↔PHP: lee input, llama al service, arma respuesta JSON con código HTTP |
+| `backend/src/Services/` | Reglas de negocio puras (ej. "una devolución repone stock y genera egreso") |
+| `backend/src/Repositories/` | Único lugar con SQL (PDO + prepared statements), una clase por entidad |
+| `backend/src/Models/` | Estructuras de datos planas (Producto, Venta, Factura, Ingreso, Egreso...) |
+| `backend/src/Middleware/` | Autenticación por sesión y cabeceras CORS |
+| `backend/src/Config/` | Conexión PDO (`Database`) y carga de variables de entorno (`Env`) |
+| `backend/src/Utils/` | Helpers transversales (respuesta JSON, request, validador, JWT) |
 | `database/` | Scripts SQL versionables y reproducibles |
 | `docs/` | Contrato de API (OpenAPI) y este documento de arquitectura |
+
+El backend usa **PSR-4**: el prefijo `Retail\` se mapea a `backend/src/` en
+`composer.json`. Si Composer no está instalado, `backend/autoload.php` registra
+un autoloader mínimo equivalente.
 
 ## 4. Módulos del sistema
 
@@ -98,15 +103,15 @@ cada endpoint salvo `/api/auth/login`.
 ## 7. Flujo de ejemplo: "Registrar una venta"
 
 ```
-1. sales.html → botón "Confirmar pago"
-2. js/modules/sales.js → api.post('/api/sales/checkout', {items, metodo_pago})
-3. routes/sales.routes.php → SalesController::checkout()
+1. features/sales/sales.html → botón "Confirmar pago"
+2. features/sales/sales.js → api.post('/sales/checkout', {items, metodo_pago})
+3. backend/src/Routes/SalesRoutes.php → SalesController::checkout()
 4. SalesController valida payload → SalesService::checkout($items, $metodo)
 5. SalesService:
    a. ProductRepository::verificarDisponibilidad($items)
    b. ProductRepository::descontarStock($items)
    c. IngresoRepository::registrar($total, $metodo)
-   d. FacturaService::generar($venta)  (si aplica)
+   d. InvoiceService::generar($venta)  (si aplica)
 6. Controller responde 201 con {success, message, data: {venta, factura}}
 7. sales.js recibe JSON, re-renderiza carrito y muestra notificación
 ```
