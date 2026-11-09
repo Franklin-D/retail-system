@@ -1,0 +1,21 @@
+# Propietarios del código (CODEOWNERS)
+# GitHub usa este archivo para solicitar revisión automática en Pull Requests.
+
+# Propietario por defecto de todo el repositorio.
+* @Franklin-D
+
+# Backend (PHP)
+/backend/ @Franklin-D
+
+# Frontend (HTML/CSS/JS)
+/frontend/ @Franklin-D
+
+# Base de datos
+/database/ @Franklin-D
+
+# Documentación y contrato de API
+/docs/ @Franklin-D
+
+# Configuración de GitHub y CI
+/.github/ @Franklin-D
+/composer.json @Franklin-D
