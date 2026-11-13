@@ -6,7 +6,7 @@ info:
     Autenticación por sesión PHP (cookie httpOnly PHPSESSID).
   version: 0.2.0
 servers:
-  - url: http://localhost/retail-system/backend/public/index.php/api
+  - url: http://localhost/Ing-Soft/retail-system/backend/public/index.php/api
     description: Apache/XAMPP
   - url: http://localhost:8000/api
     description: Servidor de desarrollo local (php -S)
@@ -163,6 +163,68 @@ paths:
       summary: Listar egresos
       responses:
         '200': { description: Listado }
+    post:
+      summary: Registrar un egreso de caja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [descripcion, monto]
+              properties:
+                descripcion: { type: string }
+                monto: { type: number, minimum: 0.01 }
+                motivo:
+                  type: string
+                  enum: [Compra, Devolucion, 'Producto danado', 'Producto vencido', Otro]
+                  default: Otro
+                fecha:
+                  type: string
+                  format: date
+                  description: Fecha del egreso (YYYY-MM-DD). Si se omite, se usa la fecha actual.
+                compra_id:
+                  type: [integer, 'null']
+                  description: Compra asociada, si aplica.
+      responses:
+        '201': { description: Egreso registrado }
+        '400': { description: Datos inválidos }
+        '422': { description: Errores de validación }
+  /finance/dashboard:
+    get:
+      summary: Dashboard financiero agregado
+      description: >
+        KPIs, serie diaria de ingresos/egresos, top 5 de productos vendidos,
+        alertas de stock y movimientos del período. Las ventas se filtran por
+        fecha y categoría; ingresos y egresos de caja se filtran por fecha.
+      parameters:
+        - in: query
+          name: desde
+          schema: { type: string, format: date }
+          description: Fecha inicial inclusive (YYYY-MM-DD).
+        - in: query
+          name: hasta
+          schema: { type: string, format: date }
+          description: Fecha final inclusive (YYYY-MM-DD).
+        - in: query
+          name: categoria_id
+          schema: { type: integer, minimum: 1 }
+          description: Filtra ventas, top de productos y alertas de stock por categoría.
+      responses:
+        '200':
+          description: >
+            Objeto con filtros, resumen (ventas_hoy, ventas_periodo,
+            ingresos_periodo, egresos_periodo, balance_periodo), serie,
+            top_productos, alertas_stock y movimientos.
+        '400': { description: Fechas o categoría inválidas }
+  /finance/movimientos:
+    get:
+      summary: Movimientos financieros combinados
+      description: >
+        Ventas, ingresos manuales y egresos ordenados por fecha descendente.
+        Cada venta reemplaza a su ingreso automático para evitar duplicados.
+      responses:
+        '200': { description: Listado combinado de movimientos }
   /reports:
     get:
       summary: Catálogo de reportes

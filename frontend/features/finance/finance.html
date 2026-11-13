@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Planet Color · Finanzas</title>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.4/dist/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="../../assets/css/styles.css">
+  <link rel="stylesheet" href="./finance.css">
 </head>
 <body data-page="finance">
   <div style="display:flex; height:100%; width:100%;">
@@ -15,17 +19,59 @@
       <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
       <h1 style="font-size: 32px; margin-bottom: 20px;">Finanzas</h1>
 
+      <form id="filtrosForm" class="card rep-filtros">
+        <label>Desde <input type="date" id="filtroDesde"></label>
+        <label>Hasta <input type="date" id="filtroHasta"></label>
+        <label>Categoría
+          <select id="filtroCategoria"><option value="">Todas</option></select>
+        </label>
+        <button type="submit" class="btn-primary">Filtrar</button>
+      </form>
+      <p id="filtrosAviso" class="alert alert-error" hidden></p>
+      <p class="rep-nota">La categoría filtra ventas, productos más vendidos y alertas de stock. Los ingresos y egresos de caja no tienen categoría.</p>
+      <p id="rangoTexto" class="rep-nota"></p>
+
+      <div class="rep-tarjetas">
+        <div class="card"><span class="rep-etiqueta">Ventas de hoy</span><strong class="rep-valor" id="kpiVentasHoy">S/ 0.00</strong></div>
+        <div class="card"><span class="rep-etiqueta">Ventas del período</span><strong class="rep-valor" id="kpiVentasPeriodo">S/ 0.00</strong></div>
+        <div class="card"><span class="rep-etiqueta">Ingresos del período</span><strong class="rep-valor" id="kpiIngresos">S/ 0.00</strong></div>
+        <div class="card"><span class="rep-etiqueta">Egresos del período</span><strong class="rep-valor" id="kpiEgresos">S/ 0.00</strong></div>
+        <div class="card"><span class="rep-etiqueta">Balance del período</span><strong class="rep-valor" id="kpiBalance">S/ 0.00</strong></div>
+      </div>
+
       <div class="card">
+        <h3>Ingresos vs. egresos por día</h3>
+        <div class="rep-canvas"><canvas id="graficoFinanzas"></canvas></div>
+        <p id="graficoVacio" class="rep-nota" hidden>No hay movimientos en el período seleccionado.</p>
+      </div>
+
+      <div class="rep-grid">
+        <div class="card">
+          <h3>Productos más vendidos</h3>
+          <ol id="masVendidos" class="rep-lista"></ol>
+          <p id="masVendidosNota" class="rep-nota"></p>
+        </div>
+        <div class="card">
+          <h3>Alertas de stock</h3>
+          <ul id="alertasStock" class="rep-lista"></ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Movimientos del período</h3>
+        <p class="rep-nota">Las ventas se muestran en lugar de su ingreso automático para evitar duplicados. El filtro de categoría aplica a las ventas.</p>
         <table>
           <thead>
             <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Monto</th></tr>
           </thead>
           <tbody id="financeTableBody">
-            <tr style="text-align:center; color:#94a3b8;">
-              <td colspan="4">Pendiente de conectar con /api/income (Etapa 9)</td>
-            </tr>
+            <tr style="text-align:center; color:#94a3b8;"><td colspan="4">Cargando movimientos...</td></tr>
           </tbody>
         </table>
+        <div class="rep-acciones">
+          <button type="button" class="btn-primary btn-secondary" id="btnCsv">Exportar CSV</button>
+          <button type="button" class="btn-primary btn-secondary" id="btnPdf">Exportar PDF</button>
+        </div>
       </div>
     </div>
   </div>

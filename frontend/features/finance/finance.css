@@ -1,0 +1,24 @@
+/* HU-301: dashboard financiero */
+.rep-filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
+.rep-filtros label { font-size: 13px; color: #475569; font-weight: 600; }
+.rep-nota { font-size: 12px; color: #64748b; margin: 4px 0 8px; }
+.rep-tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.rep-tarjetas .card { margin: 8px 0; }
+.rep-etiqueta { display: block; color: #64748b; font-size: 13px; }
+.rep-valor { font-size: 24px; font-weight: 700; }
+.rep-positivo { color: #16a34a; }
+.rep-negativo { color: #dc2626; }
+.rep-canvas { position: relative; height: 280px; margin-top: 10px; }
+.rep-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.rep-lista { padding-left: 20px; margin-top: 10px; }
+.rep-lista li { margin: 6px 0; }
+.rep-acciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+
+@media print {
+  html, body { height: auto; overflow: visible; }
+  body > div { display: block !important; height: auto !important; }
+  [data-component="sidebar"], .sidebar, .hamburger-btn,
+  .rep-filtros, .rep-acciones, .rep-nota:not(#rangoTexto) { display: none !important; }
+  .main-content { overflow: visible; padding: 0; }
+  .card { box-shadow: none; break-inside: avoid; }
+}

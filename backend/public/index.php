@@ -88,6 +88,9 @@ try {
         case 'expenses':
             require __DIR__ . '/../src/Routes/ExpenseRoutes.php';
             break;
+        case 'finance':
+            require __DIR__ . '/../src/Routes/FinanceRoutes.php';
+            break;
         case 'reports':
             require __DIR__ . '/../src/Routes/ReportRoutes.php';
             break;

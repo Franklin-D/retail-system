@@ -144,6 +144,41 @@ class ProductRepository
         return $stmt->fetchAll();
     }
 
+    /** Productos publicados cuyo stock está en o por debajo del mínimo; opcionalmente por categoría. */
+    public function findAlertasStock(?int $categoriaId = null): array
+    {
+        $where = [
+            'p.activo = 1',
+            "p.estado = 'publicado'",
+            'p.stock <= p.stock_minimo',
+        ];
+        $params = [];
+        if ($categoriaId !== null) {
+            $where[] = 'p.categoria_id = :categoria';
+            $params[':categoria'] = $categoriaId;
+        }
+
+        $sql = "SELECT p.id, p.nombre, p.stock, p.stock_minimo, p.categoria_id,
+                       c.nombre AS categoria
+                FROM productos p
+                INNER JOIN categorias c ON c.id = p.categoria_id
+                WHERE " . implode(' AND ', $where) . "
+                ORDER BY (CAST(p.stock AS SIGNED) - CAST(p.stock_minimo AS SIGNED)) ASC, p.nombre ASC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        $filas = $stmt->fetchAll();
+        foreach ($filas as &$fila) {
+            $fila['id'] = (int) $fila['id'];
+            $fila['categoria_id'] = (int) $fila['categoria_id'];
+            $fila['stock'] = (int) $fila['stock'];
+            $fila['stock_minimo'] = (int) $fila['stock_minimo'];
+            $fila['alerta_stock'] = true;
+        }
+        unset($fila);
+        return $filas;
+    }
+
     public function verificarDisponibilidad(array $items): array
     {
         $resultado = [];
