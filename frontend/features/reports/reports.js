@@ -67,9 +67,12 @@ function renderInventario(items) {
       <td>${escapeHtml(p.nombre)}</td>
       <td>${p.stock}${p.alerta_stock ? ' ⚠' : ''}</td>
       <td>${formatCurrency(p.precio)}</td>
-      <td>${formatDate(p.fecha_vencimiento)}${p.alerta_vencimiento ? ' ⚠' : ''}</td>
+      <td>${formatDate(p.fecha_vencimiento)}${p.alerta_vencimiento ? ' ⚠' : ''}${p.vencido ? ' (vencido)' : ''}</td>
+      <td>${Number(p.descuento_porcentaje) > 0
+        ? `−${p.descuento_porcentaje}% → ${formatCurrency(p.precio_con_descuento)}`
+        : '—'}</td>
     </tr>`).join('');
-  return `<table><thead><tr><th>Producto</th><th>Stock</th><th>Precio</th><th>Vencimiento</th></tr></thead><tbody>${filas || filaVacia(4, 'Sin datos')}</tbody></table>`;
+  return `<table><thead><tr><th>Producto</th><th>Stock</th><th>Precio</th><th>Vencimiento</th><th>Descuento</th></tr></thead><tbody>${filas || filaVacia(5, 'Sin datos')}</tbody></table>`;
 }
 
 function renderGanancias(data) {

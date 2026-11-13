@@ -47,8 +47,19 @@
       </div>
 
       <div class="card" style="margin-top:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px;">
+          <h3 style="font-size:18px;">Alertas de vencimiento</h3>
+          <span id="expirySummary" class="badge badge-info">Sin alertas</span>
+        </div>
+        <div id="expiryAlerts">
+          <p class="skeleton">Cargando alertas...</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
         <p style="color:#94a3b8; font-size:13px;">
-          Los totales se obtienen de <code>/api/reports/summary</code>.
+          Los totales se obtienen de <code>/api/reports/summary</code> y las
+          alertas de <code>/api/products/expiring</code>.
         </p>
       </div>
     </div>

@@ -340,6 +340,19 @@ dashboard-stats.grid-3 {
   border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.badge-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.badge-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
 .skeleton {
   color: #94a3b8;
   text-align: center;

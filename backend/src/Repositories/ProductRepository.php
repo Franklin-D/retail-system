@@ -127,11 +127,28 @@ class ProductRepository
         return $stmt->rowCount() > 0;
     }
 
+    /** Productos publicados que vencen dentro de los próximos $dias (incluye ya vencidos). */
+    public function findProximosAVencer(int $dias): array
+    {
+        $limite = date('Y-m-d', strtotime("+{$dias} days"));
+        $sql = "SELECT p.*, c.nombre AS categoria, pr.nombre AS proveedor
+                FROM productos p
+                INNER JOIN categorias c ON c.id = p.categoria_id
+                INNER JOIN proveedores pr ON pr.id = p.proveedor_id
+                WHERE p.activo = 1 AND p.estado = 'publicado'
+                  AND p.fecha_vencimiento IS NOT NULL
+                  AND p.fecha_vencimiento <= :limite
+                ORDER BY p.fecha_vencimiento ASC, p.nombre ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':limite' => $limite]);
+        return $stmt->fetchAll();
+    }
+
     public function verificarDisponibilidad(array $items): array
     {
         $resultado = [];
         $stmt = $this->pdo->prepare(
-            "SELECT id, nombre, stock, precio FROM productos WHERE id = :id AND activo = 1 AND estado = 'publicado' LIMIT 1 FOR UPDATE"
+            "SELECT id, nombre, stock, precio, fecha_vencimiento FROM productos WHERE id = :id AND activo = 1 AND estado = 'publicado' LIMIT 1 FOR UPDATE"
         );
 
         foreach ($items as $item) {
@@ -149,11 +166,12 @@ class ProductRepository
                 throw new Exception("Stock insuficiente para {$row['nombre']}", 400);
             }
             $resultado[] = [
-                'producto_id'     => (int) $row['id'],
-                'nombre'          => $row['nombre'],
-                'cantidad'        => $cantidad,
-                'precio_unitario' => (float) $row['precio'],
-                'stock'           => (int) $row['stock'],
+                'producto_id'       => (int) $row['id'],
+                'nombre'            => $row['nombre'],
+                'cantidad'          => $cantidad,
+                'precio_unitario'   => (float) $row['precio'],
+                'fecha_vencimiento' => $row['fecha_vencimiento'],
+                'stock'             => (int) $row['stock'],
             ];
         }
 

@@ -34,6 +34,13 @@ if (($rest[0] ?? '') === 'drafts') {
     } else {
         Response::error('Método o parámetro no permitido para /products/drafts', 405);
     }
+} elseif (($rest[0] ?? '') === 'expiring') {
+    // GET /products/expiring?dias=30 -> alertas y descuentos por próximos a vencer
+    if ($method === 'GET') {
+        $controller->expiring();
+    } else {
+        Response::error('Método no permitido para /products/expiring', 405);
+    }
 } else {
     $id = isset($rest[0]) && ctype_digit((string) $rest[0]) ? (int) $rest[0] : null;
 

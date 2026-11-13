@@ -5,6 +5,7 @@ namespace Retail\Services;
 use Exception;
 use Retail\Models\Producto;
 use Retail\Repositories\ProductRepository;
+use Retail\Utils\ExpiryPolicy;
 use Retail\Utils\Validator;
 
 class ProductService
@@ -18,7 +19,10 @@ class ProductService
 
     public function listar(?string $search = null): array
     {
-        return $this->repo->findAll($search);
+        return array_map(
+            fn(array $producto) => ExpiryPolicy::decorar($producto),
+            $this->repo->findAll($search)
+        );
     }
 
     public function obtener(int $id): array
@@ -27,7 +31,42 @@ class ProductService
         if (!$producto) {
             throw new Exception('Producto no encontrado', 404);
         }
-        return $producto;
+        return ExpiryPolicy::decorar($producto);
+    }
+
+    /** Productos próximos a vencer con su descuento sugerido (HU-101). */
+    public function proximosAVencer(?int $dias = null): array
+    {
+        $dias = $dias ?? ExpiryPolicy::DIAS_ALERTA;
+        return array_map(
+            fn(array $producto) => ExpiryPolicy::decorar($producto),
+            $this->repo->findProximosAVencer($dias)
+        );
+    }
+
+    public function resumenProximosAVencer(?int $dias = null): array
+    {
+        $dias = $dias ?? ExpiryPolicy::DIAS_ALERTA;
+        $productos = $this->proximosAVencer($dias);
+
+        $resumen = [
+            'dias_alerta' => $dias,
+            'total'       => count($productos),
+            'vencidos'    => 0,
+            'criticos'    => 0,
+            'proximos'    => 0,
+        ];
+        foreach ($productos as $producto) {
+            if ($producto['nivel_vencimiento'] === 'vencido') {
+                $resumen['vencidos']++;
+            } elseif (in_array($producto['nivel_vencimiento'], ['critico', 'vence_hoy'], true)) {
+                $resumen['criticos']++;
+            } else {
+                $resumen['proximos']++;
+            }
+        }
+
+        return $resumen;
     }
 
     public function crear(array $data): array

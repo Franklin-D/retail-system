@@ -8,6 +8,7 @@ use Retail\Models\Venta;
 use Retail\Repositories\IncomeRepository;
 use Retail\Repositories\ProductRepository;
 use Retail\Repositories\SalesRepository;
+use Retail\Utils\ExpiryPolicy;
 
 class SalesService
 {
@@ -53,9 +54,17 @@ class SalesService
         try {
             $lineas = $this->productos->verificarDisponibilidad($items);
             $total = 0;
-            foreach ($lineas as $linea) {
+            // El descuento por vencimiento se calcula en el servidor, no en el cliente.
+            foreach ($lineas as &$linea) {
+                $linea['precio_base'] = $linea['precio_unitario'];
+                $linea['descuento_porcentaje'] = ExpiryPolicy::descuentoPorcentaje($linea['fecha_vencimiento']);
+                $linea['precio_unitario'] = ExpiryPolicy::precioConDescuento(
+                    $linea['precio_unitario'],
+                    $linea['fecha_vencimiento']
+                );
                 $total += $linea['cantidad'] * $linea['precio_unitario'];
             }
+            unset($linea);
 
             $ventaId = $this->ventas->create([
                 'cliente_id'  => $clienteId ?: 1,

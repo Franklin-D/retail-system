@@ -27,17 +27,24 @@ function renderProductos() {
     lista.innerHTML = '<div class="skeleton">No hay productos disponibles</div>';
     return;
   }
-  lista.innerHTML = productos.map((p) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #e2e8f0;">
-      <div>
-        <strong>${escapeHtml(p.nombre)}</strong>
-        <div style="color:#64748b; font-size:13px;">${escapeHtml(p.codigo_barra)} · Stock: ${p.stock} · ${formatCurrency(p.precio)}</div>
-      </div>
-      <button type="button" class="btn-primary btn-agregar" data-id="${p.id}" ${Number(p.stock) <= 0 ? 'disabled' : ''}>
-        Agregar
-      </button>
-    </div>
-  `).join('');
+  lista.innerHTML = productos.map((p) => {
+    const pct = Number(p.descuento_porcentaje) || 0;
+    const precioHtml = pct > 0
+      ? `<strong>${formatCurrency(p.precio_con_descuento)}</strong> <s style="color:#94a3b8;">${formatCurrency(p.precio)}</s> <span class="badge badge-warning">−${pct}%</span>`
+      : formatCurrency(p.precio);
+    const vencidoHtml = p.nivel_vencimiento === 'vencido'
+      ? ' <span class="badge badge-danger">Vencido</span>' : '';
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #e2e8f0;">
+        <div>
+          <strong>${escapeHtml(p.nombre)}</strong>${vencidoHtml}
+          <div style="color:#64748b; font-size:13px;">${escapeHtml(p.codigo_barra)} · Stock: ${p.stock} · ${precioHtml}</div>
+        </div>
+        <button type="button" class="btn-primary btn-agregar" data-id="${p.id}" ${Number(p.stock) <= 0 ? 'disabled' : ''}>
+          Agregar
+        </button>
+      </div>`;
+  }).join('');
 }
 
 function renderCarrito() {
@@ -57,7 +64,9 @@ function renderCarrito() {
       <td>
         <input type="number" min="1" max="${item.stock}" value="${item.cantidad}" class="cantidad-item" style="width:80px;">
       </td>
-      <td>${formatCurrency(item.precio)}</td>
+      <td>${Number(item.descuento) > 0
+        ? `<strong>${formatCurrency(item.precio)}</strong><div style="font-size:12px;color:#94a3b8;"><s>${formatCurrency(item.precio_base)}</s> −${item.descuento}%</div>`
+        : formatCurrency(item.precio)}</td>
       <td>${formatCurrency(item.precio * item.cantidad)}</td>
       <td><button type="button" class="btn-danger btn-quitar">Quitar</button></td>
     </tr>
@@ -82,10 +91,13 @@ function agregarAlCarrito(id) {
     }
     existente.cantidad += 1;
   } else {
+    const descuento = Number(producto.descuento_porcentaje) || 0;
     carrito.push({
       producto_id: Number(producto.id),
       nombre: producto.nombre,
-      precio: Number(producto.precio),
+      precio: descuento > 0 ? Number(producto.precio_con_descuento) : Number(producto.precio),
+      precio_base: Number(producto.precio),
+      descuento,
       stock: Number(producto.stock),
       cantidad: 1,
     });

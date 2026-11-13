@@ -15,6 +15,9 @@ y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
   workflow de CI), `.editorconfig`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
   `SECURITY.md` y `CHANGELOG.md`.
 - Workflow de GitHub Actions para validar sintaxis PHP y JavaScript.
+- HU-101: alertas y descuentos automáticos por productos próximos a vencer
+  (`GET /api/products/expiring`, tramos 10/15/20 % y descuento aplicado en el
+  checkout).
 
 ### Changed
 

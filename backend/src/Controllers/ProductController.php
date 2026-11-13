@@ -29,6 +29,15 @@ class ProductController
         Response::success($this->service->listar($search), 'Listado de productos obtenido');
     }
 
+    public function expiring(): void
+    {
+        $dias = isset($_GET['dias']) ? max(1, (int) $_GET['dias']) : null;
+        Response::success([
+            'resumen'   => $this->service->resumenProximosAVencer($dias),
+            'productos' => $this->service->proximosAVencer($dias),
+        ], 'Productos próximos a vencer');
+    }
+
     public function show(int $id): void
     {
         try {

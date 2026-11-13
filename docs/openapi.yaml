@@ -81,6 +81,20 @@ paths:
           schema: { type: integer }
       responses:
         '200': { description: Eliminado }
+  /products/expiring:
+    get:
+      summary: Productos próximos a vencer con alertas y descuentos
+      description: >
+        Devuelve los productos publicados cuya fecha de vencimiento cae dentro
+        de los próximos `dias` (por defecto 30), incluidos los ya vencidos.
+        Cada producto incluye `dias_restantes`, `nivel_vencimiento`,
+        `descuento_porcentaje`, `precio_con_descuento` y `ahorro`.
+      parameters:
+        - in: query
+          name: dias
+          schema: { type: integer, minimum: 1, default: 30 }
+      responses:
+        '200': { description: Resumen de alertas y listado de productos }
   /categories:
     get:
       summary: Listar categorías

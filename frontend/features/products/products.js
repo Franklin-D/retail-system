@@ -56,14 +56,26 @@ function render(items) {
     const alerta = Number(p.stock) <= Number(p.stock_minimo)
       ? ' style="color:#dc2626;font-weight:bold;"'
       : '';
+    const pct = Number(p.descuento_porcentaje) || 0;
+    const nivel = p.nivel_vencimiento;
+    const estiloVencimiento = (nivel === 'vencido' || nivel === 'vence_hoy')
+      ? 'color:#dc2626;font-weight:bold;'
+      : nivel === 'critico' ? 'color:#d97706;font-weight:bold;'
+      : nivel === 'proximo' ? 'color:#b45309;' : '';
+    const precioHtml = pct > 0
+      ? `<div><strong>${formatCurrency(p.precio_con_descuento)}</strong></div>
+         <div style="font-size:12px;color:#94a3b8;"><s>${formatCurrency(p.precio)}</s> −${pct}%</div>`
+      : formatCurrency(p.precio);
+    const vencimientoHtml = `<span style="${estiloVencimiento}">${formatDate(p.fecha_vencimiento)}</span>
+      ${pct > 0 ? `<span class="badge badge-warning">−${pct}%</span>` : ''}`;
     return `<tr data-id="${p.id}">
       <td>${img}</td>
       <td>${escapeHtml(p.nombre)}</td>
       <td>${escapeHtml(p.codigo_barra)}</td>
       <td>${escapeHtml(p.categoria || '')}</td>
       <td${alerta}>${p.stock}</td>
-      <td>${formatCurrency(p.precio)}</td>
-      <td>${formatDate(p.fecha_vencimiento)}</td>
+      <td>${precioHtml}</td>
+      <td>${vencimientoHtml}</td>
       <td>
         <button type="button" class="btn-secondary btn-editar">Editar</button>
         <button type="button" class="btn-danger btn-eliminar">Eliminar</button>

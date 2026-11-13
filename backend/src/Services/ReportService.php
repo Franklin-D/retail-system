@@ -6,6 +6,7 @@ use Retail\Repositories\ExpenseRepository;
 use Retail\Repositories\IncomeRepository;
 use Retail\Repositories\ProductRepository;
 use Retail\Repositories\SalesRepository;
+use Retail\Utils\ExpiryPolicy;
 
 class ReportService
 {
@@ -61,13 +62,12 @@ class ReportService
     public function inventario(): array
     {
         $hoy = date('Y-m-d');
-        $limite = date('Y-m-d', strtotime('+30 days'));
         $items = $this->productos->findAll();
         foreach ($items as &$item) {
             $item['alerta_stock'] = (int) $item['stock'] <= (int) $item['stock_minimo'];
-            $venc = $item['fecha_vencimiento'] ?? null;
-            $item['alerta_vencimiento'] = $venc && $venc <= $limite;
-            $item['vencido'] = $venc && $venc < $hoy;
+            $item = array_merge($item, ExpiryPolicy::decorar($item, $hoy));
+            $item['alerta_vencimiento'] = $item['nivel_vencimiento'] !== null;
+            $item['vencido'] = $item['nivel_vencimiento'] === 'vencido';
         }
         unset($item);
         return $items;
