@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos y Facturación (HU-105 / HU-205)</title>
+    <link rel="stylesheet" href="css/hu105_hu205.css">
+</head>
+<body>
+<div class="container">
+    <h1>Sistema Retail — Inventario y Facturación</h1>
+
+    <div class="card">
+        <h2>HU-105: Gestión de Productos y Ubicación en Estante</h2>
+        <div id="msgProducto" class="msg"></div>
+        <form id="formProducto">
+            <input type="hidden" id="prod_id" name="id">
+            <div class="grid">
+                <div>
+                    <label>Código de Barras *</label>
+                    <input type="text" id="prod_codigo" name="codigo" required placeholder="Ej. 775123456789">
+                </div>
+                <div>
+                    <label>Nombre del Producto *</label>
+                    <input type="text" id="prod_nombre" name="nombre" required placeholder="Ej. Arroz Extra 5kg">
+                </div>
+                <div>
+                    <label>Categoría</label>
+                    <select id="prod_categoria" name="categoria_id"></select>
+                </div>
+                <div>
+                    <label>Ubicación (Pasillo / Estante)</label>
+                    <select id="prod_ubicacion" name="ubicacion_id"></select>
+                </div>
+                <div>
+                    <label>Costo (S/) *</label>
+                    <input type="number" step="0.01" id="prod_costo" name="costo" required>
+                </div>
+                <div>
+                    <label>Precio Venta (S/) *</label>
+                    <input type="number" step="0.01" id="prod_precio" name="precio_venta" required>
+                </div>
+                <div>
+                    <label>Stock Actual *</label>
+                    <input type="number" id="prod_stock" name="stock" required value="0">
+                </div>
+                <div>
+                    <label>Stock Mínimo (Alerta) *</label>
+                    <input type="number" id="prod_minimo" name="stock_minimo" required value="5">
+                </div>
+            </div>
+            <div style="margin-top: 14px;">
+                <button type="submit" id="btnGuardarProd">Guardar Producto</button>
+                <button type="button" class="btn-sec" onclick="resetFormProducto()">Limpiar</button>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Producto</th>
+                    <th>Categoría</th>
+                    <th>Ubicación</th>
+                    <th>Precio</th>
+                    <th>Stock / Mín.</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaProductos"></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>HU-205: Facturación Electrónica (Boletas y Facturas)</h2>
+        <div id="msgFactura" class="msg"></div>
+        <form id="formFactura">
+            <div class="grid">
+                <div>
+                    <label>ID de Venta Registrada *</label>
+                    <input type="number" id="fact_venta_id" name="venta_id" required placeholder="Ej. 1">
+                </div>
+                <div>
+                    <label>Tipo Comprobante *</label>
+                    <select id="fact_tipo" name="tipo_comprobante" onchange="ajustarDoc()">
+                        <option value="BOLETA">BOLETA DE VENTA</option>
+                        <option value="FACTURA">FACTURA ELECTRÓNICA</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Tipo Documento *</label>
+                    <select id="fact_tipo_doc" name="tipo_documento_cliente">
+                        <option value="DNI">DNI (8 dígitos)</option>
+                        <option value="RUC">RUC (11 dígitos)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Número DNI / RUC *</label>
+                    <input type="text" id="fact_num_doc" name="numero_documento_cliente" maxlength="11" required placeholder="8 u 11 dígitos">
+                </div>
+                <div>
+                    <label>Nombre / Razón Social *</label>
+                    <input type="text" id="fact_cliente" name="nombre_cliente" required placeholder="Cliente o Empresa">
+                </div>
+            </div>
+            <div style="margin-top: 14px;">
+                <button type="submit">Emitir Comprobante</button>
+            </div>
+        </form>
+
+        <div id="contenedorPreview" style="display:none; margin-top: 20px;">
+            <div style="margin-bottom: 10px;">
+                <button type="button" class="btn-sec" onclick="cambiarFormato('ticket')">Vista Ticket 80mm</button>
+                <button type="button" class="btn-sec" onclick="cambiarFormato('a4')">Vista A4</button>
+                <button type="button" onclick="window.print()">Imprimir Comprobante</button>
+            </div>
+            <div id="areaImpresion" class="preview-box formato-ticket"></div>
+        </div>
+    </div>
+</div>
+
+<script src="js/hu105_hu205.js"></script>
+</body>
+</html>
