@@ -34,6 +34,9 @@ jobs:
           done < <(find backend -name '*.php' -print0)
           exit $status
 
+      - name: Pruebas de búsqueda tolerante
+        run: php backend/tests/product_search_test.php
+
   javascript:
     name: Sintaxis JavaScript
     runs-on: ubuntu-latest

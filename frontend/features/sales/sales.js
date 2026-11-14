@@ -1,11 +1,12 @@
 import { api, ApiError } from '../../shared/js/api.js';
 import { requireSession } from '../../shared/js/auth.js';
 import { showToast } from '../../shared/js/toast.js';
-import { formatCurrency, debounce } from '../../shared/js/helpers.js';
+import { formatCurrency } from '../../shared/js/helpers.js';
 import { openModal, closeModal } from '../../shared/js/modal.js';
 
 let productos = [];
 let carrito = [];
+let searchTimer = null;
 
 async function load() {
   await requireSession();
@@ -134,14 +135,43 @@ function bindEvents() {
     renderCarrito();
   });
 
-  document.getElementById('searchProduct')?.addEventListener('input', debounce((event) => {
-    cargarProductos(event.target.value.trim()).catch((err) => showToast(err.message, 'error'));
-  }, 300));
+  const searchInput = document.getElementById('searchProduct');
+  searchInput?.addEventListener('input', (event) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      cargarProductos(event.target.value.trim()).catch((err) => showToast(err.message, 'error'));
+    }, 300);
+  });
+  searchInput?.addEventListener('keydown', async (event) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    clearTimeout(searchTimer);
+    const codigo = searchInput.value.trim();
+    if (!codigo) return;
+
+    try {
+      const { data } = await api.get(`/products?search=${encodeURIComponent(codigo)}`);
+      const exacto = (data || []).find((producto) => String(producto.codigo_barra).toLowerCase() === codigo.toLowerCase());
+      if (!exacto) {
+        productos = data || [];
+        renderProductos();
+        showToast('No se encontró un código de barras exacto; elige un resultado de búsqueda', 'error');
+        return;
+      }
+      productos = [exacto];
+      agregarAlCarrito(exacto.id);
+      searchInput.value = '';
+      await cargarProductos();
+      searchInput.focus();
+    } catch (err) {
+      showToast(err.message || 'No se pudo buscar el código', 'error');
+    }
+  });
 
   document.getElementById('scanBarcodeBtn')?.addEventListener('click', () => {
     const input = document.getElementById('searchProduct');
     input?.focus();
-    showToast('Escribe o escanea el código de barras en el buscador');
+    showToast('Escanea el código y presiona Enter para agregar el producto');
   });
 
   document.getElementById('checkoutBtn')?.addEventListener('click', () => {

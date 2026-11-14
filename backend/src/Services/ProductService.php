@@ -6,6 +6,7 @@ use Exception;
 use Retail\Models\Producto;
 use Retail\Repositories\ProductRepository;
 use Retail\Utils\ExpiryPolicy;
+use Retail\Utils\ProductSearch;
 use Retail\Utils\Validator;
 
 class ProductService
@@ -19,9 +20,15 @@ class ProductService
 
     public function listar(?string $search = null): array
     {
+        $productos = $this->repo->findAll($search);
+        if ($search !== null && trim($search) !== '' && !$productos) {
+            // La búsqueda literal prioriza código de barras y fragmentos de nombre;
+            // el fallback tolerante compara exclusivamente nombres.
+            $productos = ProductSearch::fuzzy($this->repo->findAll(), $search);
+        }
         return array_map(
             fn(array $producto) => ExpiryPolicy::decorar($producto),
-            $this->repo->findAll($search)
+            $productos
         );
     }
 

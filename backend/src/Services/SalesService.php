@@ -41,6 +41,9 @@ class SalesService
 
     public function checkout(array $items, string $metodoPago, int $usuarioId, ?int $clienteId = null): array
     {
+        if ($usuarioId < 1) {
+            throw new Exception('El cajero de la sesión no es válido', 401);
+        }
         $metodos = ['Efectivo', 'Tarjeta', 'Yape', 'Plin'];
         if (!in_array($metodoPago, $metodos, true)) {
             throw new Exception('Método de pago no válido', 400);
@@ -82,7 +85,9 @@ class SalesService
             $pdo->commit();
             return ['venta' => $venta, 'factura' => $factura];
         } catch (Throwable $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             throw $e;
         }
     }

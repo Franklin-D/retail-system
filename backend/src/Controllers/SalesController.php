@@ -38,7 +38,7 @@ class SalesController
         try {
             $resultado = $this->service->checkout(
                 $input['items'] ?? [],
-                $input['metodo_pago'] ?? 'Efectivo',
+                (string) ($input['metodo_pago'] ?? ''),
                 (int) $usuario['id'],
                 isset($input['cliente_id']) ? (int) $input['cliente_id'] : null
             );
