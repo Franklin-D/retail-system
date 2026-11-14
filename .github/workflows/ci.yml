@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: Sintaxis PHP
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Validar composer.json
+        run: composer validate --no-check-publish
+
+      - name: Lint de archivos PHP
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            php -l "$file" || status=1
+          done < <(find backend -name '*.php' -print0)
+          exit $status
+
+      - name: Pruebas de búsqueda tolerante
+        run: php backend/tests/product_search_test.php
+
+  javascript:
+    name: Sintaxis JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Lint de módulos ES
+        run: |
+          status=0
+          while IFS= read -r file; do
+            cp "$file" /tmp/check.mjs
+            node --check /tmp/check.mjs || status=1
+          done < <(find frontend -name '*.js')
+          exit $status
