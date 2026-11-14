@@ -6,6 +6,7 @@ use Exception;
 use Throwable;
 use Retail\Models\Venta;
 use Retail\Repositories\IncomeRepository;
+use Retail\Repositories\InventoryMovementRepository;
 use Retail\Repositories\ProductRepository;
 use Retail\Repositories\SalesRepository;
 use Retail\Utils\ExpiryPolicy;
@@ -15,6 +16,7 @@ class SalesService
     private SalesRepository $ventas;
     private ProductRepository $productos;
     private IncomeRepository $ingresos;
+    private InventoryMovementRepository $movimientos;
     private InvoiceService $facturas;
 
     public function __construct()
@@ -22,6 +24,7 @@ class SalesService
         $this->ventas = new SalesRepository();
         $this->productos = new ProductRepository();
         $this->ingresos = new IncomeRepository();
+        $this->movimientos = new InventoryMovementRepository();
         $this->facturas = new InvoiceService();
     }
 
@@ -74,6 +77,28 @@ class SalesService
             ], $lineas);
 
             $this->productos->descontarStock($lineas);
+            $stockActual = [];
+            foreach ($lineas as $linea) {
+                $productoId = (int) $linea['producto_id'];
+                if (!isset($stockActual[$productoId])) {
+                    $stockActual[$productoId] = (int) $linea['stock'];
+                }
+                $anterior = $stockActual[$productoId];
+                $nuevo = $anterior - (int) $linea['cantidad'];
+                $stockActual[$productoId] = $nuevo;
+
+                $this->movimientos->registrar([
+                    'producto_id'    => $productoId,
+                    'usuario_id'     => $usuarioId,
+                    'tipo'           => 'salida',
+                    'cantidad'       => -1 * (int) $linea['cantidad'],
+                    'stock_anterior' => $anterior,
+                    'stock_nuevo'    => $nuevo,
+                    'origen'         => 'venta',
+                    'referencia_id'  => $ventaId,
+                    'motivo'         => "Venta #{$ventaId} - {$linea['nombre']}",
+                ]);
+            }
             $this->ingresos->registrar($total, $metodoPago, $usuarioId, $ventaId);
 
             $venta = $this->ventas->findById($ventaId);

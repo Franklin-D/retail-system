@@ -79,6 +79,10 @@ try {
         case 'purchases':
             require __DIR__ . '/../src/Routes/PurchaseRoutes.php';
             break;
+        case 'inventory':
+        case 'kardex':
+            require __DIR__ . '/../src/Routes/InventoryRoutes.php';
+            break;
         case 'invoices':
             require __DIR__ . '/../src/Routes/InvoiceRoutes.php';
             break;

@@ -8,6 +8,8 @@ use Retail\Utils\Response;
 $controller = new FinanceController();
 if ($method === 'GET') {
     $controller->ingresos();
+} elseif ($method === 'POST') {
+    $controller->storeIngreso();
 } else {
     Response::error('Método no permitido para /income', 405);
 }

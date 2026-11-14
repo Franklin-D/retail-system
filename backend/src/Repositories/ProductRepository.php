@@ -195,6 +195,48 @@ class ProductRepository
         }
     }
 
+    /** Producto activo bloqueado para una operación de compra (evita carreras de stock). */
+    public function findParaCompra(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT id, nombre, stock, precio
+             FROM productos
+             WHERE id = :id AND activo = 1
+             LIMIT 1 FOR UPDATE"
+        );
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    /** Incrementa el stock y devuelve los valores antes/después para el Kardex. */
+    public function incrementarStock(int $id, int $cantidad): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT stock FROM productos WHERE id = :id AND activo = 1 LIMIT 1 FOR UPDATE"
+        );
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            throw new Exception("Producto no encontrado (id {$id})", 404);
+        }
+
+        $anterior = (int) $row['stock'];
+        $nuevo = $anterior + $cantidad;
+        if ($nuevo < 0) {
+            throw new Exception('El stock resultante no puede ser negativo', 400);
+        }
+
+        $update = $this->pdo->prepare("UPDATE productos SET stock = :stock WHERE id = :id");
+        $update->execute([':stock' => $nuevo, ':id' => $id]);
+
+        return [
+            'producto_id'    => $id,
+            'stock_anterior' => $anterior,
+            'stock_nuevo'    => $nuevo,
+        ];
+    }
+
     public function resumenInventario(): array
     {
         $sql = "SELECT

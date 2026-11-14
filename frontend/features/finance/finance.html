@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planet Color · Finanzas</title>
+  <title>Planet Color - Finanzas</title>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
@@ -13,16 +13,38 @@
 
     <div class="main-content">
       <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
-      <h1 style="font-size: 32px; margin-bottom: 20px;">Finanzas</h1>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:10px; flex-wrap:wrap;">
+        <h1 style="font-size: 32px;">Finanzas</h1>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-primary" id="addIncomeBtn">+ Ingreso de caja</button>
+          <button class="btn-danger" id="addExpenseBtn">- Egreso de caja</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:15px;">
+        <div class="card" style="margin:0;">
+          <div style="color:#64748b; font-size:13px;">Ingresos</div>
+          <div id="totalIngresos" style="font-size:24px; font-weight:bold; color:#15803d;">S/ 0.00</div>
+        </div>
+        <div class="card" style="margin:0;">
+          <div style="color:#64748b; font-size:13px;">Egresos</div>
+          <div id="totalEgresos" style="font-size:24px; font-weight:bold; color:#dc2626;">S/ 0.00</div>
+        </div>
+        <div class="card" style="margin:0;">
+          <div style="color:#64748b; font-size:13px;">Saldo</div>
+          <div id="saldoCaja" style="font-size:24px; font-weight:bold;">S/ 0.00</div>
+        </div>
+      </div>
 
       <div class="card">
         <table>
           <thead>
-            <tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Monto</th></tr>
+            <tr><th>Fecha</th><th>Descripción</th><th>Motivo</th><th>Tipo</th><th>Comprobante</th><th>Monto</th></tr>
           </thead>
           <tbody id="financeTableBody">
             <tr style="text-align:center; color:#94a3b8;">
-              <td colspan="4">Pendiente de conectar con /api/income (Etapa 9)</td>
+              <td colspan="6">Cargando movimientos...</td>
             </tr>
           </tbody>
         </table>
@@ -30,7 +52,53 @@
     </div>
   </div>
 
+  <div id="incomeModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="modal-title">Registrar Ingreso de Caja</div>
+        <button data-close-modal="incomeModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">&times;</button>
+      </div>
+      <form id="incomeForm">
+        <div class="form-group"><label>Descripción</label><input type="text" name="descripcion" required placeholder="Ej: Fondo adicional de caja chica"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Motivo</label><input type="text" name="motivo" required placeholder="Ej: Reposición de caja chica"></div>
+          <div class="form-group"><label>Comprobante</label><input type="text" name="comprobante" placeholder="Nro. de comprobante"></div>
+          <div class="form-group"><label>Monto (S/)</label><input type="number" name="monto" min="0.01" step="0.01" required></div>
+          <div class="form-group">
+            <label>Método de pago</label>
+            <select name="metodo_pago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%; justify-content:center;">Guardar Ingreso</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="expenseModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="modal-title">Registrar Egreso de Caja</div>
+        <button data-close-modal="expenseModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">&times;</button>
+      </div>
+      <form id="expenseForm">
+        <div class="form-group"><label>Descripción</label><input type="text" name="descripcion" required placeholder="Ej: Compra de útiles de limpieza"></div>
+        <div class="form-grid">
+          <div class="form-group"><label>Motivo</label><input type="text" name="motivo" required placeholder="Ej: Gasto extraordinario"></div>
+          <div class="form-group"><label>Comprobante</label><input type="text" name="comprobante" placeholder="Nro. de comprobante"></div>
+          <div class="form-group"><label>Monto (S/)</label><input type="number" name="monto" min="0.01" step="0.01" required></div>
+        </div>
+        <button type="submit" class="btn-danger" style="width:100%; justify-content:center;">Guardar Egreso</button>
+      </form>
+    </div>
+  </div>
+
   <script src="../../shared/js/load-component.js" type="module"></script>
+  <script type="module" src="../../shared/js/modal.js"></script>
   <script type="module" src="./finance.js"></script>
 </body>
 </html>

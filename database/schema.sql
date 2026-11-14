@@ -32,6 +32,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- -----------------------------------------------------------------------
 -- Limpieza (permite re-ejecutar el script en un entorno de desarrollo)
 -- -----------------------------------------------------------------------
+DROP TABLE IF EXISTS movimientos_inventario;
 DROP TABLE IF EXISTS egresos;
 DROP TABLE IF EXISTS ingresos;
 DROP TABLE IF EXISTS facturas;
@@ -248,9 +249,11 @@ CREATE TABLE ingresos (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   fecha         DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   descripcion   VARCHAR(255)  NOT NULL,
+  motivo        VARCHAR(100)  NULL COMMENT 'Motivo del ingreso extraordinario de caja (RF-2.1)',
+  comprobante   VARCHAR(100)  NULL COMMENT 'Nǧmero o referencia del comprobante de caja',
   monto         DECIMAL(10,2) NOT NULL,
   metodo_pago   ENUM('Efectivo','Tarjeta','Yape','Plin') NOT NULL DEFAULT 'Efectivo',
-  venta_id      INT UNSIGNED  NULL COMMENT 'Venta que originó este ingreso, si aplica',
+  venta_id      INT UNSIGNED  NULL COMMENT 'Venta que origin�� este ingreso, si aplica',
   usuario_id    INT UNSIGNED  NOT NULL,
   created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_ingresos_venta
@@ -269,8 +272,9 @@ CREATE TABLE egresos (
   fecha         DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   descripcion   VARCHAR(255)  NOT NULL,
   monto         DECIMAL(10,2) NOT NULL,
-  motivo        ENUM('Compra','Devolucion','Producto danado','Producto vencido','Otro') NOT NULL DEFAULT 'Otro',
-  compra_id     INT UNSIGNED  NULL COMMENT 'Compra que originó este egreso, si aplica',
+  motivo        VARCHAR(100)  NOT NULL DEFAULT 'Otro' COMMENT 'Compra, devoluci��n, gasto extraordinario, etc. (RF-2.2)',
+  comprobante   VARCHAR(100)  NULL COMMENT 'Nǧmero o referencia del comprobante de caja',
+  compra_id     INT UNSIGNED  NULL COMMENT 'Compra que origin�� este egreso, si aplica',
   usuario_id    INT UNSIGNED  NOT NULL,
   created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_egresos_compra
@@ -283,6 +287,35 @@ CREATE TABLE egresos (
 
 CREATE INDEX idx_egresos_fecha ON egresos(fecha);
 
+-- -------------------------------------------- movimientos_inventario ----
+-- Kardex bǭsico (RF-1.11): toda entrada/salida de stock queda auditada.
+CREATE TABLE movimientos_inventario (
+  id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  producto_id     INT UNSIGNED NOT NULL,
+  usuario_id      INT UNSIGNED NOT NULL,
+  fecha           DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  tipo            ENUM('entrada','salida','ajuste') NOT NULL,
+  cantidad        INT          NOT NULL COMMENT 'Positiva para entradas; negativa para salidas',
+  stock_anterior  INT UNSIGNED NOT NULL,
+  stock_nuevo     INT UNSIGNED NOT NULL,
+  origen          ENUM('compra','venta','ajuste','inventario_inicial','devolucion') NOT NULL DEFAULT 'ajuste',
+  referencia_id   INT UNSIGNED NULL COMMENT 'ID de la compra, venta o ajuste que origin�� el movimiento',
+  motivo          VARCHAR(255) NULL,
+  created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_movimientos_producto
+    FOREIGN KEY (producto_id) REFERENCES productos(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_movimientos_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+CREATE INDEX idx_movimientos_producto_fecha ON movimientos_inventario(producto_id, fecha);
+CREATE INDEX idx_movimientos_fecha ON movimientos_inventario(fecha);
+CREATE INDEX idx_movimientos_origen ON movimientos_inventario(origen, referencia_id);
+
+-- =============================================================================
+-- FIN schema.sql
 -- =============================================================================
 -- FIN schema.sql
 -- =============================================================================

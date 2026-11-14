@@ -18,6 +18,7 @@ Las migraciones se aplican en orden numérico:
 
 ```bash
 mysql -u root -p planet_color < migrations/001_productos_estado.sql
+mysql -u root -p planet_color < migrations/002_compras_caja_kardex.sql
 ```
 
 ## Convenciones usadas

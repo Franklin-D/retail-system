@@ -148,6 +148,57 @@ paths:
       summary: Listar compras
       responses:
         '200': { description: Listado }
+    post:
+      summary: Registrar compra, incrementar stock y generar egreso (RF-2.4)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [proveedor_id, items]
+              properties:
+                proveedor_id: { type: integer }
+                comprobante: { type: string }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [producto_id, cantidad]
+                    properties:
+                      producto_id: { type: integer }
+                      cantidad: { type: integer, minimum: 1 }
+                      precio_unitario: { type: number, minimum: 0 }
+      responses:
+        '201': { description: Compra registrada y stock actualizado }
+  /purchases/{id}:
+    get:
+      summary: Obtener detalle de una compra
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Compra con detalle }
+  /inventory/movements:
+    get:
+      summary: Historial de movimientos de inventario o Kardex (RF-1.11)
+      parameters:
+        - in: query
+          name: producto_id
+          schema: { type: integer }
+        - in: query
+          name: origen
+          schema: { type: string, enum: [compra, venta, ajuste, inventario_inicial, devolucion] }
+        - in: query
+          name: desde
+          schema: { type: string, format: date }
+        - in: query
+          name: hasta
+          schema: { type: string, format: date }
+      responses:
+        '200': { description: Movimientos de inventario }
   /invoices:
     get:
       summary: Listar facturas
@@ -158,11 +209,44 @@ paths:
       summary: Listar ingresos
       responses:
         '200': { description: Listado }
+    post:
+      summary: Registrar ingreso extraordinario de caja (RF-2.1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [monto]
+              properties:
+                descripcion: { type: string }
+                motivo: { type: string }
+                comprobante: { type: string }
+                monto: { type: number, minimum: 0.01 }
+                metodo_pago: { type: string, enum: [Efectivo, Tarjeta, Yape, Plin] }
+      responses:
+        '201': { description: Ingreso registrado }
   /expenses:
     get:
       summary: Listar egresos
       responses:
         '200': { description: Listado }
+    post:
+      summary: Registrar egreso extraordinario de caja (RF-2.2)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [monto]
+              properties:
+                descripcion: { type: string }
+                motivo: { type: string }
+                comprobante: { type: string }
+                monto: { type: number, minimum: 0.01 }
+      responses:
+        '201': { description: Egreso registrado }
   /reports:
     get:
       summary: Catálogo de reportes

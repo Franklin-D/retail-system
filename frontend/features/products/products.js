@@ -77,6 +77,7 @@ function render(items) {
       <td>${precioHtml}</td>
       <td>${vencimientoHtml}</td>
       <td>
+        <button type="button" class="btn-secondary btn-kardex">Kardex</button>
         <button type="button" class="btn-secondary btn-editar">Editar</button>
         <button type="button" class="btn-danger btn-eliminar">Eliminar</button>
       </td>
@@ -86,6 +87,7 @@ function render(items) {
 
 function bindEvents() {
   document.getElementById('addProductBtn')?.addEventListener('click', () => abrirFormulario());
+  document.getElementById('openKardexBtn')?.addEventListener('click', () => abrirKardex());
 
   const search = document.getElementById('searchProduct');
   search?.addEventListener('input', debounce((event) => {
@@ -98,6 +100,8 @@ function bindEvents() {
     const id = Number(fila.dataset.id);
     if (event.target.classList.contains('btn-editar')) {
       await abrirEdicion(id);
+    } else if (event.target.classList.contains('btn-kardex')) {
+      await abrirKardex(id);
     } else if (event.target.classList.contains('btn-eliminar')) {
       await eliminarProducto(id);
     }
@@ -170,6 +174,60 @@ async function eliminarProducto(id) {
     await cargarProductos(document.getElementById('searchProduct')?.value.trim() || '');
   } catch (err) {
     showToast(err.message || 'No se pudo eliminar', 'error');
+  }
+}
+
+async function abrirKardex(productoId = null) {
+  const titulo = document.getElementById('kardexTitle');
+  const contenido = document.getElementById('kardexContent');
+  if (!contenido) return;
+
+  if (titulo) {
+    titulo.textContent = productoId ? `Kardex del producto #${productoId}` : 'Kardex de inventario';
+  }
+  contenido.innerHTML = '<p style="color:#94a3b8;">Cargando movimientos...</p>';
+  openModal('kardexModal');
+
+  try {
+    const url = productoId
+      ? `/inventory/movements?producto_id=${encodeURIComponent(productoId)}`
+      : '/inventory/movements';
+    const peticiones = [api.get(url)];
+    if (productoId) peticiones.push(api.get(`/products/${productoId}`));
+    const [movimientos, producto] = await Promise.all(peticiones);
+
+    if (producto?.data && titulo) {
+      titulo.textContent = `Kardex: ${producto.data.nombre}`;
+    }
+
+    const items = movimientos.data || [];
+    if (!items.length) {
+      contenido.innerHTML = '<p style="color:#94a3b8;">No hay movimientos de inventario registrados.</p>';
+      return;
+    }
+
+    contenido.innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Origen</th><th>Cantidad</th><th>Stock</th><th>Motivo</th></tr>
+        </thead>
+        <tbody>
+          ${items.map((m) => `
+            <tr>
+              <td>${formatDate(m.fecha)}</td>
+              <td>${escapeHtml(m.producto || '')}</td>
+              <td><span class="badge ${m.tipo === 'entrada' ? 'badge-info' : m.tipo === 'salida' ? 'badge-danger' : 'badge-warning'}">${escapeHtml(m.tipo)}</span></td>
+              <td>${escapeHtml(m.origen)}</td>
+              <td>${Number(m.cantidad) > 0 ? '+' : ''}${m.cantidad}</td>
+              <td>${m.stock_anterior} &rarr; ${m.stock_nuevo}</td>
+              <td>${escapeHtml(m.motivo || '—')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    contenido.innerHTML = `<p style="color:#dc2626;">${escapeHtml(err.message || 'No se pudo cargar el Kardex')}</p>`;
   }
 }
 

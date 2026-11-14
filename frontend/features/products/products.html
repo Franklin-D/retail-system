@@ -16,9 +16,14 @@
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 style="font-size: 32px;">Productos e Inventario</h1>
-        <button class="btn-primary" id="addProductBtn">
-          <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Agregar Producto
-        </button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-secondary" id="openKardexBtn">
+            <i data-lucide="history" style="width: 18px; height: 18px;"></i> Kardex
+          </button>
+          <button class="btn-primary" id="addProductBtn">
+            <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Agregar Producto
+          </button>
+        </div>
       </div>
 
       <div class="card" style="margin-bottom:20px;">
@@ -74,6 +79,18 @@
           Guardar Producto
         </button>
       </form>
+    </div>
+  </div>
+
+  <div id="kardexModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="modal-title" id="kardexTitle">Kardex de inventario</div>
+        <button data-close-modal="kardexModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">&times;</button>
+      </div>
+      <div id="kardexContent">
+        <p style="color:#94a3b8;">Cargando movimientos...</p>
+      </div>
     </div>
   </div>
 
