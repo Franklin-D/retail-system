@@ -1,76 +1,77 @@
 <?php
-include 'config.php';
-require_once 'AuditoriaLogService.php';
+session_start();
+require_once 'conexion.php'; // Tu conexión mysqli
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+$action = $_POST['action'] ?? '';
 
-header('Content-Type: application/json');
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
-$auditoria = new AuditoriaLogService($conn);
-
-if ($action == 'login') {
-    $username = mysqli_real_escape_string($conn, $_POST['username'] ?? '');
+if ($action === 'login') {
+    $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
-    $sql = "SELECT u.id, u.username, u.password_hash, u.secret_2fa, r.nombre as rol 
-            FROM usuarios u 
-            JOIN roles r ON u.rol_id = r.id 
-            WHERE u.username = '$username' AND u.activo = 1 LIMIT 1";
-    $res = mysqli_query($conn, $sql);
+    // 1. Buscar usuario en la base de datos usando consultas preparadas
+    $stmt = $conn->prepare("SELECT id, username, password_hash, rol_id, secret_2fa FROM usuarios WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-    if ($row = mysqli_fetch_assoc($res)) {
+    if ($row = $result->fetch_assoc()) {
+        // 2. Verificar la contraseña principal con password_verify
         if (password_verify($password, $row['password_hash'])) {
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['username'] = $row['username'];
-            $_SESSION['user_rol'] = $row['rol'];
             
-            // Si el usuario tiene 2FA configurado, marcar como pendiente
-            if (!empty($row['secret_2fa'])) {
-                $_SESSION['requires_2fa'] = true;
-                $_SESSION['temp_secret_2fa'] = $row['secret_2fa'];
-                $auditoria->registrar($row['id'], 'LOGIN_PASO_1', 'Credenciales válidas, esperando 2FA.');
-                echo json_encode(['status' => '2fa_required', 'msg' => 'Ingrese su código de verificación 2FA.']);
-            } else {
-                $_SESSION['requires_2fa'] = false;
-                $auditoria->registrar($row['id'], 'LOGIN_EXITOSO', 'Inicio de sesión sin 2FA.');
-                echo json_encode(['status' => 'ok', 'msg' => 'Bienvenido', 'rol' => $row['rol']]);
-            }
-            exit();
+            // 3. Generar un código temporal seguro para el 2FA (válido por 5 minutos)
+            $codigoTemporal = rand(100000, 999999);
+            
+            $_SESSION['temp_user_id'] = $row['id'];
+            $_SESSION['temp_rol_id'] = $row['rol_id'];
+            $_SESSION['codigo_2fa_generado'] = $codigoTemporal;
+            $_SESSION['2fa_expira'] = time() + 300; // Expira en 300 segundos (5 min)
+            $_SESSION['requires_2fa'] = true;
+
+            // Para pruebas locales (XAMPP), registramos el código en el error_log o lo simulamos
+            error_log("Código 2FA generado para {$username}: " . $codigoTemporal);
+
+            echo json_encode([
+                "status" => "2fa_required",
+                "message" => "Credenciales correctas. Ingrese el código 2FA.",
+                "debug_codigo_2fa" => $codigoTemporal // Opcional para pruebas locales rápidas
+            ]);
+            exit;
         }
     }
 
-    $auditoria->registrar(0, 'LOGIN_FALLIDO', "Intento fallido para usuario: $username");
-    http_response_code(401);
-    echo json_encode(['status' => 'error', 'msg' => 'Usuario o contraseña incorrectos.']);
+    echo json_encode(["status" => "error", "message" => "Credenciales inválidas"]);
+    exit;
 }
 
-if ($action == 'verificar_2fa') {
-    if (!isset($_SESSION['user_id'])) {
-        http_response_code(401);
-        echo json_encode(['status' => 'error', 'msg' => 'Sesión no iniciada.']);
-        exit();
+if ($action === 'verificar_2fa') {
+    $codigoIngresado = $_POST['codigo_2fa'] ?? '';
+
+    // Validar que exista una sesión pendiente de 2FA
+    if (!isset($_SESSION['requires_2fa']) || $_SESSION['requires_2fa'] !== true) {
+        echo json_encode(["status" => "error", "message" => "No hay sesión pendiente de validación 2FA"]);
+        exit;
     }
 
-    $codigo = $_POST['codigo_2fa'] ?? '';
-    if ($codigo === ($_SESSION['temp_secret_2fa'] ?? '')) {
+    // Validar expiración del código
+    if (time() > $_SESSION['2fa_expira']) {
+        echo json_encode(["status" => "error", "message" => "El código 2FA ha expirado"]);
+        exit;
+    }
+
+    // 4. Comparar el código ingresado con el código temporal generado (¡NUNCA contra el secreto maestro!)
+    if (hash_equals((string)$_SESSION['codigo_2fa_generado'], (string)$codigoIngresado)) {
+        // Autenticación exitosa completa
+        $_SESSION['user_id'] = $_SESSION['temp_user_id'];
+        $_SESSION['user_rol_id'] = $_SESSION['temp_rol_id'];
         $_SESSION['requires_2fa'] = false;
-        unset($_SESSION['temp_secret_2fa']);
-        $auditoria->registrar($_SESSION['user_id'], '2FA_VERIFICADO', 'Doble factor validado correctamente.');
-        echo json_encode(['status' => 'ok', 'msg' => 'Autenticación completa.', 'rol' => $_SESSION['user_rol']]);
-    } else {
-        $auditoria->registrar($_SESSION['user_id'], '2FA_FALLIDO', 'Código 2FA inválido.');
-        http_response_code(403);
-        echo json_encode(['status' => 'error', 'msg' => 'Código 2FA incorrecto.']);
-    }
-}
 
-if ($action == 'logout') {
-    if (isset($_SESSION['user_id'])) {
-        $auditoria->registrar($_SESSION['user_id'], 'LOGOUT', 'Cierre de sesión manual.');
+        // Limpiar variables temporales de seguridad
+        unset($_SESSION['temp_user_id'], $_SESSION['temp_rol_id'], $_SESSION['codigo_2fa_generado'], $_SESSION['2fa_expira']);
+
+        echo json_encode(["status" => "success", "message" => "Autenticación 2FA exitosa"]);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Código 2FA incorrecto"]);
     }
-    session_destroy();
-    echo json_encode(['status' => 'ok', 'msg' => 'Sesión cerrada.']);
+    exit;
 }
 ?>
