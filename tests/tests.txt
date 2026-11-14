@@ -1,0 +1,5 @@
+Prueba unitaria de la regla RN-001 para alertas y descuentos de lotes:
+
+  php tests/vencimiento_service_test.php
+
+La prueba usa fechas de referencia fijas y no requiere conexión a MySQL.

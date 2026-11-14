@@ -1,0 +1,11 @@
+# Proyecto: Sistema Retail - Gestión y Ganancias
+Stack: XAMPP (Apache + PHP 8.2), MySQL, HTML/CSS/JS vanilla. No frameworks.
+
+Backend: PDO con consultas preparadas y autoload PSR-4 (namespace Retail\ -> backend/src/).
+Capas: Routes -> Controllers -> Services -> Repositories; Models y Utils transversales.
+Estructura BD: ver /database/schema.sql y /database/seed.sql.
+Estándares: nombres de clase en PascalCase, métodos de dominio en español, comentarios cortos.
+Regla: No crear frameworks nuevos. Mejorar lo que hay.
+Objetivo actual: mantener el CRUD de productos, ventas, compras y reportes.
+
+Cuando te pidan algo, primero lee /database/schema.sql y /backend/src/Config/Database.php

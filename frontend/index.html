@@ -1,38 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retail System - Productos</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color · Inicio</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <style>
+    .inicio { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; gap: 24px; }
+    .inicio h1 { font-size: 36px; font-weight: 800; letter-spacing: 1px; text-align: center; }
+    .inicio p { color: #94a3b8; text-align: center; }
+    .inicio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; max-width: 900px; }
+    .inicio-grid a { text-decoration: none; color: inherit; }
+    .inicio-grid .card { text-align: center; padding: 20px; transition: transform .15s; }
+    .inicio-grid .card:hover { transform: translateY(-3px); }
+    .inicio-estado { font-size: 13px; color: #94a3b8; }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Gestión de Productos Retail</h1>
-        
-        <div class="cards">
-            <div class="card">Productos: <span id="total-prod">0</span></div>
-            <div class="card">Stock Total: <span id="total-stock">0</span></div>
-            <div class="card ganancia">Ganancia Potencial: S/ <span id="total-ganancia">0.00</span></div>
-        </div>
+<body data-page="index">
+  <main class="inicio">
+    <h1>PLANET COLOR</h1>
+    <p>Sistema de gestión retail: inventario, ventas, compras y finanzas.</p>
+    <p class="inicio-estado" id="estado">Verificando sesión…</p>
 
-        <form id="form-producto">
-            <h3>Agregar Producto</h3>
-            <input type="text" name="nombre" placeholder="Nombre" required>
-            <input type="text" name="codigo" placeholder="Código" required>
-            <input type="number" step="0.01" name="costo" placeholder="Costo" required>
-            <input type="number" step="0.01" name="precio_venta" placeholder="Precio Venta" required>
-            <input type="number" name="stock" placeholder="Stock" required>
-            <button type="submit">Guardar</button>
-        </form>
-
-        <table>
-            <thead>
-                <tr><th>ID</th><th>Nombre</th><th>Código</th><th>Costo</th><th>Venta</th><th>Stock</th><th>Ganancia x Und</th><th>Acción</th></tr>
-            </thead>
-            <tbody id="tabla-productos"></tbody>
-        </table>
+    <div class="inicio-grid" id="menu" hidden>
+      <a href="features/dashboard/dashboard.html"><div class="card">🏠<br>Panel Principal</div></a>
+      <a href="features/products/products.html"><div class="card">📦<br>Productos e Inventario</div></a>
+      <a href="features/drafts/drafts.html"><div class="card">📝<br>Pre-carga de Productos</div></a>
+      <a href="features/sales/sales.html"><div class="card">🛒<br>Ventas</div></a>
+      <a href="features/purchases/purchases.html"><div class="card">🚚<br>Compras</div></a>
+      <a href="features/customers/customers.html"><div class="card">👥<br>Clientes</div></a>
+      <a href="features/suppliers/suppliers.html"><div class="card">🏭<br>Proveedores</div></a>
+      <a href="features/invoices/invoices.html"><div class="card">🧾<br>Facturación</div></a>
+      <a href="features/finance/finance.html"><div class="card">📊<br>Finanzas</div></a>
+      <a href="features/reports/reports.html"><div class="card">📋<br>Reportes</div></a>
     </div>
-<script src="js/app.js"></script>
+
+    <a class="btn-primary" id="btnLogin" href="features/auth/login.html" hidden
+       style="text-decoration:none; padding:12px 28px; justify-content:center;">Iniciar sesión</a>
+  </main>
+
+  <script type="module">
+    import { getCurrentUser } from './shared/js/auth.js';
+
+    const estado = document.getElementById('estado');
+    const menu = document.getElementById('menu');
+    const btnLogin = document.getElementById('btnLogin');
+
+    const usuario = await getCurrentUser();
+    if (usuario) {
+      // Sesión activa: se muestra el acceso a todos los módulos
+      estado.textContent = `Sesión iniciada: ${usuario.nombre ?? usuario.email ?? 'usuario'}`;
+      menu.hidden = false;
+    } else {
+      // Sin sesión (o backend apagado): se envía al login
+      estado.textContent = 'Debes iniciar sesión para continuar.';
+      btnLogin.hidden = false;
+      setTimeout(() => { window.location.href = 'features/auth/login.html'; }, 1200);
+    }
+  </script>
 </body>
 </html>
