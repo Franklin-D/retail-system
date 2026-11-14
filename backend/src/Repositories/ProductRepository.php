@@ -180,10 +180,38 @@ class ProductRepository
 
     public function descontarStock(array $items): void
     {
+        $lotes = $this->pdo->prepare(
+            'SELECT id, stock FROM lotes
+             WHERE producto_id = :producto_id AND stock > 0
+             ORDER BY fecha_vencimiento ASC, id ASC FOR UPDATE'
+        );
+        $descontarLote = $this->pdo->prepare(
+            'UPDATE lotes SET stock = stock - :cantidad
+             WHERE id = :id AND stock >= :cantidad_minima'
+        );
         $stmt = $this->pdo->prepare(
             "UPDATE productos SET stock = stock - :cantidad WHERE id = :id AND stock >= :cantidad_min"
         );
         foreach ($items as $item) {
+            // Consume primero el lote que vence antes (FEFO); el remanente sin lote sigue siendo stock legado.
+            $restante = (int) $item['cantidad'];
+            $lotes->execute([':producto_id' => (int) $item['producto_id']]);
+            foreach ($lotes->fetchAll() as $lote) {
+                if ($restante <= 0) {
+                    break;
+                }
+                $cantidadLote = min($restante, (int) $lote['stock']);
+                $okLote = $descontarLote->execute([
+                    ':cantidad' => $cantidadLote,
+                    ':cantidad_minima' => $cantidadLote,
+                    ':id' => (int) $lote['id'],
+                ]);
+                if (!$okLote || $descontarLote->rowCount() === 0) {
+                    throw new Exception('No se pudo descontar el stock del lote', 400);
+                }
+                $restante -= $cantidadLote;
+            }
+
             $ok = $stmt->execute([
                 ':cantidad'     => (int) $item['cantidad'],
                 ':cantidad_min' => (int) $item['cantidad'],

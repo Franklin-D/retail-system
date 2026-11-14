@@ -73,8 +73,8 @@ INSERT INTO clientes (id, nombre, documento, email, telefono) VALUES
 INSERT INTO productos
   (id, nombre, codigo_barra, descripcion, categoria_id, marca, proveedor_id, pasillo, stock, stock_minimo, precio, fecha_vencimiento, imagen) VALUES
   (1, 'Pelota de fútbol N°5',        '7501234567890', 'Pelota oficial N°5, cuero sintético', 3, 'Genérica', 1, 'A-3', 25,  5, 45.90, NULL,         'Pelota.jpg'),
-  (2, 'Pepsi 500ml',                 '7501234500012', 'Bebida gaseosa 500ml',                1, 'Pepsi',    3, 'B-1', 80, 10,  3.50, '2026-12-31', 'pepsi.jpg'),
-  (3, 'Powerade 500ml',              '7501234500029', 'Bebida rehidratante',                 1, 'Powerade', 3, 'B-1', 40, 10,  4.20, '2026-10-15', 'powerade.jpg'),
+  (2, 'Pepsi 500ml',                 '7501234500012', 'Bebida gaseosa 500ml',                1, 'Pepsi',    3, 'B-1', 80, 10,  3.50, DATE_ADD(CURDATE(), INTERVAL 20 DAY), 'pepsi.jpg'),
+  (3, 'Powerade 500ml',              '7501234500029', 'Bebida rehidratante',                 1, 'Powerade', 3, 'B-1', 40, 10,  4.20, DATE_ADD(CURDATE(), INTERVAL 5 DAY),  'powerade.jpg'),
   (4, 'Resma de papel bond A4',      '7501234500036', 'Resma 500 hojas 75g',                 2, 'Genérica', 2, 'C-2', 60, 10, 14.50, NULL,         'resma.jpg'),
   (5, 'Cuadernillo cuadriculado',    '7501234500043', 'Cuadernillo 50 hojas',                2, 'Genérica', 2, 'C-2', 120, 15,  2.80, NULL,         'Cuadernillo.jpg'),
   (6, 'Juego de reglas geométricas', '7501234500050', 'Set de reglas escuadras y transportador', 2, 'Genérica', 2, 'C-3', 35, 5,  6.90, NULL,         'reglas.jpg');
@@ -95,6 +95,12 @@ INSERT INTO detalle_venta (venta_id, producto_id, cantidad, precio_unitario) VAL
 -- Reflejar el descuento de stock de la venta de ejemplo
 UPDATE productos SET stock = stock - 2 WHERE id = 2;
 UPDATE productos SET stock = stock - 1 WHERE id = 1;
+
+-- Los productos con fecha de vencimiento comienzan con un lote inicial.
+INSERT INTO lotes (producto_id, codigo_lote, stock, fecha_vencimiento)
+SELECT id, CONCAT('LEGACY-', id), stock, fecha_vencimiento
+FROM productos
+WHERE fecha_vencimiento IS NOT NULL AND stock > 0;
 
 INSERT INTO ingresos (id, fecha, descripcion, monto, metodo_pago, venta_id, usuario_id) VALUES
   (1, '2026-09-10 10:30:00', 'Venta (Efectivo)', 52.90, 'Efectivo', 1, 2);

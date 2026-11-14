@@ -80,6 +80,7 @@ un autoloader mínimo equivalente.
 - `categorias` (id, nombre)
 - `proveedores` (id, nombre, contacto)
 - `productos` (id, nombre, codigo_barra, descripcion, categoria_id, marca, proveedor_id, pasillo, stock, precio, fecha_vencimiento, imagen)
+- `lotes` (id, producto_id, codigo_lote, stock, fecha_vencimiento, descuento_porcentaje)
 - `clientes` (id, nombre, documento, email, telefono)
 - `ventas` (id, cliente_id, usuario_id, fecha, metodo_pago, total)
 - `detalle_venta` (id, venta_id, producto_id, cantidad, precio_unitario)

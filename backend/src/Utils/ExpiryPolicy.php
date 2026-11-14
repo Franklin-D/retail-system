@@ -2,7 +2,7 @@
 
 namespace Retail\Utils;
 
-use DateTimeImmutable;
+use Retail\Services\VencimientoService;
 
 /**
  * Reglas de negocio de vencimiento y descuentos sugeridos (HU-101).
@@ -18,64 +18,22 @@ use DateTimeImmutable;
  */
 class ExpiryPolicy
 {
-    public const DIAS_ALERTA = 30;
-
-    /** [días máximos restantes, porcentaje de descuento] */
-    private const TRAMOS = [
-        [7, 20],
-        [15, 15],
-        [30, 10],
-    ];
+    public const DIAS_ALERTA = VencimientoService::DIAS_ALERTA;
 
     public static function diasRestantes(?string $fecha, ?string $hoy = null): ?int
     {
-        if ($fecha === null || trim($fecha) === '') {
-            return null;
-        }
-
-        $hoyDt = new DateTimeImmutable($hoy ?? date('Y-m-d'));
-        $fechaDt = new DateTimeImmutable(substr($fecha, 0, 10));
-
-        return (int) $hoyDt->diff($fechaDt)->format('%r%a');
+        return VencimientoService::diasRestantes($fecha, $hoy);
     }
 
     public static function descuentoPorcentaje(?string $fecha, ?string $hoy = null): int
     {
-        $dias = self::diasRestantes($fecha, $hoy);
-        if ($dias === null || $dias < 0) {
-            return 0;
-        }
-
-        foreach (self::TRAMOS as [$maximo, $porcentaje]) {
-            if ($dias <= $maximo) {
-                return $porcentaje;
-            }
-        }
-
-        return 0;
+        return VencimientoService::descuentoSugerido($fecha, $hoy);
     }
 
     /** devuelve 'vencido', 'vence_hoy', 'critico', 'proximo' o null */
     public static function nivel(?string $fecha, ?string $hoy = null): ?string
     {
-        $dias = self::diasRestantes($fecha, $hoy);
-        if ($dias === null) {
-            return null;
-        }
-        if ($dias < 0) {
-            return 'vencido';
-        }
-        if ($dias === 0) {
-            return 'vence_hoy';
-        }
-        if ($dias <= 7) {
-            return 'critico';
-        }
-        if ($dias <= self::DIAS_ALERTA) {
-            return 'proximo';
-        }
-
-        return null;
+        return VencimientoService::nivel($fecha, $hoy);
     }
 
     public static function precioConDescuento(float $precio, ?string $fecha, ?string $hoy = null): float

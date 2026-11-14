@@ -64,6 +64,9 @@ try {
         case 'productos':
             require __DIR__ . '/../src/Routes/ProductRoutes.php';
             break;
+        case 'expiry':
+            require __DIR__ . '/../src/Routes/VencimientoRoutes.php';
+            break;
         case 'categories':
             require __DIR__ . '/../src/Routes/CategoryRoutes.php';
             break;

@@ -16,13 +16,24 @@
 
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h1 style="font-size: 32px;">Productos e Inventario</h1>
-        <button class="btn-primary" id="addProductBtn">
-          <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Agregar Producto
-        </button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-secondary" type="button" id="scrollToLotForm">Registrar Lote</button>
+          <button class="btn-primary" id="addProductBtn">
+            <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Agregar Producto
+          </button>
+        </div>
       </div>
 
       <div class="card" style="margin-bottom:20px;">
         <input type="text" id="searchProduct" placeholder="Buscar por nombre o código de barras...">
+      </div>
+
+      <div class="card" id="lotAlertsCard" style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">
+          <h2 style="font-size:20px;">Alertas de vencimiento por lote</h2>
+          <span id="lotAlertsSummary" class="badge badge-info">Cargando...</span>
+        </div>
+        <div id="lotAlertsList"><p class="skeleton">Cargando lotes...</p></div>
       </div>
 
       <div class="card">
@@ -46,6 +57,22 @@
           </tbody>
         </table>
       </div>
+
+      <div class="card" id="lotFormCard" style="margin-top:20px;">
+        <h2 style="font-size:20px;margin-bottom:8px;">Registrar lote de inventario</h2>
+        <p style="color:#94a3b8;font-size:13px;margin-bottom:16px;">
+          Asigna una parte del stock disponible a un lote con su propio código y fecha de vencimiento.
+        </p>
+        <form id="lotForm">
+          <div class="form-grid">
+            <div class="form-group"><label for="lotProduct">Producto</label><select id="lotProduct" name="producto_id" required></select></div>
+            <div class="form-group"><label for="lotCode">Código del lote</label><input id="lotCode" name="codigo_lote" maxlength="64" required></div>
+            <div class="form-group"><label for="lotStock">Unidades del lote</label><input id="lotStock" name="stock" type="number" min="1" step="1" required></div>
+            <div class="form-group"><label for="lotExpiry">Fecha de vencimiento</label><input id="lotExpiry" name="fecha_vencimiento" type="date" required></div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top:15px;">Guardar lote</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -67,7 +94,6 @@
           <div class="form-group"><label>Ubicación de Pasillo</label><input type="text" name="pasillo"></div>
           <div class="form-group"><label>Stock</label><input type="number" name="stock" required min="0"></div>
           <div class="form-group"><label>Precio (S/)</label><input type="number" name="precio" required step="0.01" min="0"></div>
-          <div class="form-group"><label>Fecha de vencimiento</label><input type="date" name="fecha_vencimiento"></div>
           <div class="form-group"><label>Imagen del producto</label><input type="file" name="imagen" accept="image/*"></div>
         </div>
         <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top:15px;">

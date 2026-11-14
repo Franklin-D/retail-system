@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'feature/**']
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'feature/**']
 
 permissions:
   contents: read
@@ -33,6 +33,9 @@ jobs:
             php -l "$file" || status=1
           done < <(find backend -name '*.php' -print0)
           exit $status
+
+      - name: Prueba unitaria RN-001
+        run: php tests/vencimiento_service_test.php
 
   javascript:
     name: Sintaxis JavaScript

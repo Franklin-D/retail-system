@@ -95,6 +95,43 @@ paths:
           schema: { type: integer, minimum: 1, default: 30 }
       responses:
         '200': { description: Resumen de alertas y listado de productos }
+  /expiry/lots:
+    get:
+      summary: Listar lotes con fecha de vencimiento dentro de 30 días
+      description: Incluye lotes vencidos para que puedan retirarse y clasifica las alertas en rojo o amarillo.
+      responses:
+        '200': { description: Resumen y lotes con indicador, descuento sugerido y precio }
+    post:
+      summary: Registrar lote para un producto publicado
+      description: Reserva una parte del stock agregado del producto y registra su código y fecha de vencimiento.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [producto_id, codigo_lote, stock, fecha_vencimiento]
+              properties:
+                producto_id: { type: integer, minimum: 1 }
+                codigo_lote: { type: string, maxLength: 64 }
+                stock: { type: integer, minimum: 1 }
+                fecha_vencimiento: { type: string, format: date }
+      responses:
+        '201': { description: Lote registrado }
+        '403': { description: Solo Administrador o Repositor }
+        '422': { description: Datos de lote inválidos o stock sin asignar insuficiente }
+  /expiry/lots/{id}/discount:
+    post:
+      summary: Aplicar el porcentaje de descuento sugerido a un lote
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Descuento automático aplicado }
+        '403': { description: Solo Administrador o Repositor }
+        '422': { description: Lote vencido o fuera del periodo de alerta }
   /categories:
     get:
       summary: Listar categorías

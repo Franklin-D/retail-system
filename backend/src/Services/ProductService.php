@@ -83,6 +83,9 @@ class ProductService
     public function actualizar(int $id, array $data): array
     {
         $actual = $this->obtener($id);
+        if (!array_key_exists('fecha_vencimiento', $data)) {
+            $data['fecha_vencimiento'] = $actual['fecha_vencimiento'] ?? null;
+        }
         if (empty($data['imagen'])) {
             $data['imagen'] = $actual['imagen'];
         }

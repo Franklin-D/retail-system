@@ -39,6 +39,7 @@ DROP TABLE IF EXISTS detalle_compra;
 DROP TABLE IF EXISTS compras;
 DROP TABLE IF EXISTS detalle_venta;
 DROP TABLE IF EXISTS ventas;
+DROP TABLE IF EXISTS lotes;
 DROP TABLE IF EXISTS productos;
 DROP TABLE IF EXISTS clientes;
 DROP TABLE IF EXISTS proveedores;
@@ -140,6 +141,25 @@ CREATE INDEX idx_productos_estado ON productos(estado, activo);
 CREATE INDEX idx_productos_proveedor ON productos(proveedor_id);
 CREATE INDEX idx_productos_nombre ON productos(nombre);
 CREATE INDEX idx_productos_vencimiento ON productos(fecha_vencimiento);
+
+-- --------------------------------------------------------------- lotes ----
+-- El stock del producto es agregado; cada lote reserva una parte de ese stock.
+CREATE TABLE lotes (
+  id                    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  producto_id           INT UNSIGNED NOT NULL,
+  codigo_lote           VARCHAR(64) NOT NULL,
+  stock                 INT UNSIGNED NOT NULL DEFAULT 0,
+  fecha_vencimiento     DATE NOT NULL,
+  descuento_porcentaje  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT uq_lotes_producto_codigo UNIQUE (producto_id, codigo_lote),
+  CONSTRAINT chk_lotes_descuento CHECK (descuento_porcentaje <= 100),
+  CONSTRAINT fk_lotes_producto FOREIGN KEY (producto_id) REFERENCES productos(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+CREATE INDEX idx_lotes_vencimiento_stock ON lotes(fecha_vencimiento, stock);
 
 -- =============================================================================
 -- 3. TABLAS TRANSACCIONALES

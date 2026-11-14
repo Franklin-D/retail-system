@@ -6,13 +6,20 @@ import { openModal, closeModal } from '../../shared/js/modal.js';
 
 let categorias = [];
 let proveedores = [];
+let productosInventario = [];
 let productoEditando = null;
+let puedeGestionarLotes = false;
 
 async function load() {
-  await requireSession();
+  const usuario = await requireSession();
+  puedeGestionarLotes = ['administrador', 'repositor'].includes(String(usuario.rol || '').toLowerCase());
+  if (!puedeGestionarLotes) {
+    document.getElementById('lotFormCard')?.remove();
+    document.getElementById('scrollToLotForm')?.remove();
+  }
   await cargarCatalogos();
   bindEvents();
-  await cargarProductos();
+  await Promise.all([cargarProductos(), cargarAlertasLotes()]);
 }
 
 async function cargarCatalogos() {
@@ -36,7 +43,19 @@ function llenarSelect(name, items) {
 async function cargarProductos(search = '') {
   const query = search ? `?search=${encodeURIComponent(search)}` : '';
   const { data } = await api.get(`/products${query}`);
+  if (!search) {
+    productosInventario = data || [];
+    llenarSelectLotes(productosInventario);
+  }
   render(data || []);
+}
+
+function llenarSelectLotes(productos) {
+  const select = document.getElementById('lotProduct');
+  if (!select) return;
+  select.innerHTML = '<option value="">Seleccione un producto...</option>' + productos
+    .map((producto) => `<option value="${Number(producto.id)}">${escapeHtml(producto.nombre)} · stock ${Number(producto.stock)}</option>`)
+    .join('');
 }
 
 function render(items) {
@@ -86,6 +105,10 @@ function render(items) {
 
 function bindEvents() {
   document.getElementById('addProductBtn')?.addEventListener('click', () => abrirFormulario());
+  document.getElementById('scrollToLotForm')?.addEventListener('click', () => {
+    document.getElementById('lotFormCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('lotForm')?.addEventListener('submit', registrarLote);
 
   const search = document.getElementById('searchProduct');
   search?.addEventListener('input', debounce((event) => {
@@ -103,7 +126,96 @@ function bindEvents() {
     }
   });
 
+  document.getElementById('lotAlertsList')?.addEventListener('click', async (event) => {
+    const boton = event.target.closest('[data-aplicar-descuento-lote]');
+    if (!boton) return;
+    boton.disabled = true;
+    try {
+      await api.post(`/expiry/lots/${Number(boton.dataset.aplicarDescuentoLote)}/discount`, {});
+      showToast('Descuento automático aplicado al lote');
+      await cargarAlertasLotes();
+    } catch (err) {
+      showToast(err.message || 'No se pudo aplicar el descuento', 'error');
+      boton.disabled = false;
+    }
+  });
+
   document.getElementById('addProductForm')?.addEventListener('submit', guardarProducto);
+}
+
+async function registrarLote(event) {
+  event.preventDefault();
+  const form = event.target;
+  const boton = form.querySelector('button[type="submit"]');
+  const payload = Object.fromEntries(new FormData(form).entries());
+  payload.producto_id = Number(payload.producto_id);
+  payload.stock = Number(payload.stock);
+  boton.disabled = true;
+  try {
+    await api.post('/expiry/lots', payload);
+    showToast('Lote registrado');
+    form.reset();
+    await cargarProductos();
+    await cargarAlertasLotes();
+  } catch (err) {
+    showToast(err.message || 'No se pudo registrar el lote', 'error');
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+async function cargarAlertasLotes() {
+  const contenedor = document.getElementById('lotAlertsList');
+  if (!contenedor) return;
+  try {
+    const { data } = await api.get('/expiry/lots');
+    renderAlertasLotes(data);
+  } catch (err) {
+    contenedor.innerHTML = `<p style="color:#dc2626;">${escapeHtml(err.message || 'No se pudieron cargar las alertas')}</p>`;
+  }
+}
+
+function renderAlertasLotes(data) {
+  const contenedor = document.getElementById('lotAlertsList');
+  const etiqueta = document.getElementById('lotAlertsSummary');
+  if (!contenedor) return;
+  const lotes = data?.lotes || [];
+  const resumen = data?.resumen || {};
+  if (etiqueta) {
+    etiqueta.textContent = lotes.length
+      ? `${resumen.vencidos || 0} vencidos · ${resumen.criticos || 0} críticos · ${resumen.proximos || 0} próximos`
+      : 'Sin alertas';
+    etiqueta.className = `badge ${resumen.vencidos ? 'badge-danger' : lotes.length ? 'badge-warning' : 'badge-info'}`;
+  }
+  if (!lotes.length) {
+    contenedor.innerHTML = '<p style="color:#94a3b8;font-size:13px;">No hay lotes con vencimiento dentro de los próximos 30 días.</p>';
+    return;
+  }
+
+  contenedor.innerHTML = `<table>
+    <thead><tr><th>Producto</th><th>Lote</th><th>Stock</th><th>Vence</th><th>Estado</th><th>Descuento</th><th>Acción</th></tr></thead>
+    <tbody>${lotes.map((lote) => {
+      const actual = Number(lote.descuento_porcentaje) || 0;
+      const sugerido = Number(lote.descuento_sugerido) || 0;
+      const claseAlerta = lote.color_alerta === 'rojo' ? 'badge-danger' : 'badge-warning';
+      const estado = lote.nivel_vencimiento === 'vencido'
+        ? `Vencido (${Math.abs(Number(lote.dias_restantes))} d)`
+        : lote.nivel_vencimiento === 'vence_hoy' ? 'Vence hoy'
+        : `${lote.color_alerta === 'rojo' ? 'Crítico' : 'Próximo'} (${Number(lote.dias_restantes)} d)`;
+      const accion = puedeGestionarLotes && sugerido > 0 && actual !== sugerido
+        ? `<button type="button" class="btn-secondary" data-aplicar-descuento-lote="${Number(lote.lote_id)}">Aplicar −${sugerido}%</button>`
+        : actual === sugerido && sugerido > 0 ? '<span class="badge badge-success">Aplicado</span>'
+        : lote.nivel_vencimiento === 'vencido' ? '<span class="badge badge-danger">Retirar</span>'
+        : puedeGestionarLotes ? '—' : '<span class="badge badge-info">Solo lectura</span>';
+      return `<tr>
+        <td>${escapeHtml(lote.nombre)}</td><td>${escapeHtml(lote.codigo_lote)}</td>
+        <td>${Number(lote.stock)}</td><td>${formatDate(lote.fecha_vencimiento)}</td>
+        <td><span class="badge ${claseAlerta}">${estado}</span></td>
+        <td>${actual > 0 ? `−${actual}%` : '—'}${sugerido > 0 ? `<div style="font-size:12px;color:#94a3b8;">Sugerido: −${sugerido}%</div>` : ''}</td>
+        <td>${accion}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
 }
 
 function abrirFormulario(producto = null) {
@@ -122,8 +234,6 @@ function abrirFormulario(producto = null) {
     form.pasillo.value = producto.pasillo || '';
     form.stock.value = producto.stock ?? 0;
     form.precio.value = producto.precio ?? 0;
-    form.fecha_vencimiento.value = producto.fecha_vencimiento
-      ? String(producto.fecha_vencimiento).slice(0, 10) : '';
   }
   openModal('addProductModal');
 }
