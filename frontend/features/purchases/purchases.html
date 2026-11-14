@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planet Color - Compras</title>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+</head>
+<body data-page="purchases">
+  <div style="display:flex; height:100%; width:100%;">
+    <div data-component="sidebar"></div>
+
+    <div class="main-content">
+      <button class="hamburger-btn" id="hamburgerBtn"><i data-lucide="menu"></i></button>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1 style="font-size: 32px;">Compras a Proveedores</h1>
+        <button class="btn-primary" id="addPurchaseBtn">
+          <i data-lucide="plus" style="width: 18px; height: 18px;"></i> Registrar Compra
+        </button>
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Fecha</th><th>Proveedor</th><th>Productos</th><th>Total</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="purchasesTableBody">
+            <tr style="text-align:center; color:#94a3b8;">
+              <td colspan="5">Cargando compras...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="addPurchaseModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="modal-title">Registrar Compra</div>
+        <button data-close-modal="addPurchaseModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">&times;</button>
+      </div>
+
+      <form id="purchaseForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Proveedor</label>
+            <select name="proveedor_id" required></select>
+          </div>
+          <div class="form-group">
+            <label>Comprobante / Factura del proveedor</label>
+            <input type="text" name="comprobante" placeholder="Ej: F001-000123">
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:10px 0;">
+          <strong>Productos ingresados</strong>
+          <button type="button" class="btn-secondary" id="addItemBtn">+ Agregar producto</button>
+        </div>
+
+        <div id="purchaseItems"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; align-items:center; margin-top:15px;">
+          <div style="font-size:18px; font-weight:bold;">Total: <span id="purchaseTotal">S/ 0.00</span></div>
+          <button type="submit" class="btn-primary">Guardar Compra</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="purchaseDetailModal" class="modal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div class="modal-title">Detalle de Compra</div>
+        <button data-close-modal="purchaseDetailModal" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:24px;">&times;</button>
+      </div>
+      <div id="purchaseDetailContent"></div>
+    </div>
+  </div>
+
+  <script src="../../shared/js/load-component.js" type="module"></script>
+  <script type="module" src="../../shared/js/modal.js"></script>
+  <script type="module" src="./purchases.js"></script>
+</body>
+</html>
